@@ -1,14 +1,19 @@
 package com.charanajay.photoframer;
 
+import android.Manifest;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,12 +27,15 @@ import android.widget.Toast;
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final int REQUEST_CODE = 10;
     private ImageView imageView;
     private Button select_image;
     final String[] items = new String[]{"From Camera", "From SD Card"};
     private Uri imageCapturedURI = null;
     private static final int PICK_FROM_CAMERA = 1;
     private static final int PICK_FROM_FILE = 2;
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,8 +43,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         imageView = findViewById(R.id.imageView);
         select_image = findViewById(R.id.select_image);
+
+        if ((checkSelfPermission(Manifest.permission.CAMERA)
+                & checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                & checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) == PackageManager.PERMISSION_GRANTED) {
+            select_image.setOnClickListener(this);
+        } else {
+            String[] permissionsRequested = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            requestPermissions(permissionsRequested, REQUEST_CODE);
+        }
+
         imageView.setOnClickListener(this);
         select_image.setOnClickListener(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE) {
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    imageView.setOnClickListener(this);
+                } else {
+                    Toast.makeText(this, "Permissions not enabled", Toast.LENGTH_LONG);
+                }
+            }
+        }
     }
 
     @Override

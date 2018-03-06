@@ -2,125 +2,272 @@ package com.charanajay.photoframer;
 
 import android.Manifest;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.os.StrictMode;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
-import java.io.File;
+import com.charanajay.photoframer.utils.*;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.zomato.photofilters.imageprocessors.Filter;
+import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
+import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
+import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    public static final int REQUEST_CODE = 10;
-    private ImageView imageView;
-    private Button select_image;
-    final String[] items = new String[]{"From Camera", "From SD Card"};
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+
+public class MainActivity extends AppCompatActivity implements FiltersListFragment.FiltersListFragmentListener, EditImageFragment.EditImageFragmentListener {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    public static String IMAGE_NAME = "";
+
+    public static final int SELECT_GALLERY_IMAGE = 101;
+
     private Uri imageCapturedURI = null;
-    private static final int PICK_FROM_CAMERA = 1;
-    private static final int PICK_FROM_FILE = 2;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @BindView(R.id.image_preview)
+    ImageView imagePreview;
+
+    @BindView(R.id.tabs)
+    TabLayout tabLayout;
+
+    @BindView(R.id.viewpager)
+    ViewPager viewPager;
+
+    @BindView(R.id.coordinator_layout)
+    CoordinatorLayout coordinatorLayout;
+
+    Bitmap originalImage;
+    // to backup image with filter applied
+    Bitmap filteredImage;
+
+    // the final image after applying
+    // brightness, saturation, contrast
+    Bitmap finalImage;
+
+    FiltersListFragment filtersListFragment;
+    EditImageFragment editImageFragment;
+
+    // modified image values
+    int brightnessFinal = 0;
+    float saturationFinal = 1.0f;
+    float contrastFinal = 1.0f;
+
+    // load native image filters library
+    static {
+        System.loadLibrary("NativeImageProcessor");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        imageView = findViewById(R.id.imageView);
-        select_image = findViewById(R.id.select_image);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getString(R.string.activity_title_main));
 
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
+        // loadImage();
 
-        if ((ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                & ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                & ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) == PackageManager.PERMISSION_GRANTED) {
-            select_image.setOnClickListener(this);
-        } else {
-            String[] permissionsRequested = {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-            requestPermissions(permissionsRequested, REQUEST_CODE);
-        }
 
-        imageView.setOnClickListener(this);
-        select_image.setOnClickListener(this);
+        setupViewPager(viewPager);
+        tabLayout.setupWithViewPager(viewPager);
+    }
 
+    private void setupViewPager(ViewPager viewPager) {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        // adding filter list fragment
+        filtersListFragment = new FiltersListFragment();
+        filtersListFragment.setListener(this);
+
+        // adding edit image fragment
+        editImageFragment = new EditImageFragment();
+        editImageFragment.setListener(this);
+
+        adapter.addFragment(filtersListFragment, getString(R.string.tab_filters));
+        adapter.addFragment(editImageFragment, getString(R.string.tab_edit));
+
+        viewPager.setAdapter(adapter);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE) {
-            for (int i = 0; i < grantResults.length; i++) {
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    imageView.setOnClickListener(this);
-                } else {
-                    Toast.makeText(this, "Permissions not enabled", Toast.LENGTH_LONG);
-                }
-            }
-        }
+    public void onFilterSelected(Filter filter) {
+        // reset image controls
+        resetControls();
+
+        // applying the selected filter
+        filteredImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
+        // preview filtered image
+        imagePreview.setImageBitmap(filter.processFilter(filteredImage));
+
+        finalImage = filteredImage.copy(Bitmap.Config.ARGB_8888, true);
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.select_image:
-                ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item, items);
-                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-                dialogBuilder.setTitle("Choose option");
-                dialogBuilder.setAdapter(stringArrayAdapter, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int option) {
-                        if (option == 0) {
-                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                            File file = new File(Environment.getExternalStorageDirectory(), "tmp_images" + String.valueOf(System.currentTimeMillis() + ".jpg"));
-                            imageCapturedURI = Uri.fromFile(file);
-                            try {
-                                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageCapturedURI);
-                                intent.putExtra("return data", true);
+    public void onBrightnessChanged(final int brightness) {
+        brightnessFinal = brightness;
+        Filter myFilter = new Filter();
+        myFilter.addSubFilter(new BrightnessSubFilter(brightness));
+        imagePreview.setImageBitmap(myFilter.processFilter(finalImage.copy(Bitmap.Config.ARGB_8888, true)));
+    }
 
-                                startActivityForResult(intent, PICK_FROM_CAMERA);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            intent.setType("image/*");
-//                            intent.setAction(Intent.ACTION_GET_CONTENT);
-                            startActivityForResult(Intent.createChooser(intent, "Complete Action Using"), PICK_FROM_FILE);
-                        }
-                    }
-                });
+    @Override
+    public void onSaturationChanged(final float saturation) {
+        saturationFinal = saturation;
+        Filter myFilter = new Filter();
+        myFilter.addSubFilter(new SaturationSubfilter(saturation));
+        imagePreview.setImageBitmap(myFilter.processFilter(finalImage.copy(Bitmap.Config.ARGB_8888, true)));
+    }
 
-                final AlertDialog dialog = dialogBuilder.create();
-                dialog.show();
+    @Override
+    public void onContrastChanged(final float contrast) {
+        contrastFinal = contrast;
+        Filter myFilter = new Filter();
+        myFilter.addSubFilter(new ContrastSubFilter(contrast));
+        imagePreview.setImageBitmap(myFilter.processFilter(finalImage.copy(Bitmap.Config.ARGB_8888, true)));
+    }
+
+    @Override
+    public void onEditStarted() {
+        sliderListener sldListener = new sliderListener();
+        SeekBar brightnessBar = findViewById(R.id.seekbar_brightness);
+        brightnessBar.setOnSeekBarChangeListener(sldListener);
+    }
+
+    @Override
+    public void onEditCompleted() {
+        // once the editing is done i.e seekbar is drag is completed,
+        // apply the values on to filtered image
+        final Bitmap bitmap = filteredImage.copy(Bitmap.Config.ARGB_8888, true);
+
+        Filter myFilter = new Filter();
+        myFilter.addSubFilter(new BrightnessSubFilter(brightnessFinal));
+        myFilter.addSubFilter(new ContrastSubFilter(contrastFinal));
+        myFilter.addSubFilter(new SaturationSubfilter(saturationFinal));
+        finalImage = myFilter.processFilter(bitmap);
+    }
+
+    /**
+     * Resets image edit controls to normal when new filter
+     * is selected
+     */
+    private void resetControls() {
+        if (editImageFragment != null) {
+            editImageFragment.resetControls();
         }
+        brightnessFinal = 0;
+        saturationFinal = 1.0f;
+        contrastFinal = 1.0f;
+    }
+
+    class ViewPagerAdapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public ViewPagerAdapter(FragmentManager manager) {
+            super(manager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitleList.get(position);
+        }
+    }
+
+    // load the default image from assets on app launch
+//    private void loadImage() {
+//        originalImage = BitmapUtils.getBitmapFromAssets(this, IMAGE_NAME, 300, 300);
+//        filteredImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
+//        finalImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
+//        imagePreview.setImageBitmap(originalImage);
+//    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_open) {
+            openImageFromGallery();
+            return true;
+        }
+
+        if (id == R.id.action_save) {
+            saveImageToGallery();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK)
-            return;
+        if (resultCode == RESULT_OK && requestCode == SELECT_GALLERY_IMAGE) {
+//            Bitmap bitmap = BitmapUtils.getBitmapFromGallery(this, data.getData(), 800, 800);
 
-        Bitmap imageBitmap = null;
-        String imagePath = "";
-        if (requestCode == PICK_FROM_FILE) {
+            // clear bitmap memory
+//            originalImage.recycle();
+//            finalImage.recycle();
+//            finalImage.recycle();
+//
+//            originalImage = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+//            filteredImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
+//            finalImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
+
+            Bitmap imageBitmap = null;
+            String imagePath = "";
             imageCapturedURI = data.getData();
             imagePath = getRealPathFromUri(imageCapturedURI);
             if (imagePath == null)
@@ -136,12 +283,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 options.inSampleSize = scale;
                 options.inJustDecodeBounds = false;
                 imageBitmap = BitmapFactory.decodeFile(imagePath, options);
+
+                IMAGE_NAME = imagePath;
+                filteredImage = imageBitmap.copy(imageBitmap.getConfig(),true);
+                finalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
+                imagePreview.setImageBitmap(imageBitmap);
+//            bitmap.recycle();
+
+                // render selected image thumbnails
+                filtersListFragment.prepareThumbnail(originalImage);
             }
-        } else {
-            imagePath = imageCapturedURI.getPath();
-            imageBitmap = BitmapFactory.decodeFile(imagePath);
         }
-        imageView.setImageBitmap(imageBitmap);
     }
 
     private String getRealPathFromUri(Uri imageCapturedURI) {
@@ -153,4 +305,87 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return cursor.getString(column_index);
     }
 
+    private void openImageFromGallery() {
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if (report.areAllPermissionsGranted()) {
+                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            intent.setType("image/*");
+                            startActivityForResult(intent, SELECT_GALLERY_IMAGE);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+    }
+
+    /*
+    * saves image to camera gallery
+    * */
+    private void saveImageToGallery() {
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if (report.areAllPermissionsGranted()) {
+                            final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
+                            if (!TextUtils.isEmpty(path)) {
+                                Snackbar snackbar = Snackbar
+                                        .make(coordinatorLayout, "Image saved to gallery!", Snackbar.LENGTH_LONG)
+                                        .setAction("OPEN", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                openImage(path);
+                                            }
+                                        });
+
+                                snackbar.show();
+                            } else {
+                                Snackbar snackbar = Snackbar
+                                        .make(coordinatorLayout, "Unable to save image!", Snackbar.LENGTH_LONG);
+
+                                snackbar.show();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+
+    }
+
+    // opening image in default image viewer app
+    private void openImage(String path) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.parse(path), "image/*");
+        startActivity(intent);
+    }
+
+    private class sliderListener implements SeekBar.OnSeekBarChangeListener {
+        private int smoothnessFactor = 10;
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            progress = Math.round(progress / smoothnessFactor);
+            
+        }
+
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            seekBar.setProgress(Math.round((seekBar.getProgress() + (smoothnessFactor / 2)) / smoothnessFactor) * smoothnessFactor);
+        }
+    }
 }

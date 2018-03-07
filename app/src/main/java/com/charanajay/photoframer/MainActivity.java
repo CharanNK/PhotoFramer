@@ -13,6 +13,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -171,24 +172,27 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     public void onEditStarted() {
         sliderListener brightnessSldListener = new sliderListener();
         SeekBar brightnessBar = findViewById(R.id.seekbar_brightness);
-        //brightnessBar.setProgress(125);
         brightnessBar.setOnSeekBarChangeListener(brightnessSldListener);
 
+        sliderListener contrastsldListener = new sliderListener();
         SeekBar contrastBar = findViewById(R.id.seekbar_contrast);
-        contrastBar.setOnSeekBarChangeListener(brightnessSldListener);
+        contrastBar.setOnSeekBarChangeListener(contrastsldListener);
     }
 
     @Override
     public void onEditCompleted() {
         // once the editing is done i.e seekbar is drag is completed,
         // apply the values on to filtered image
-        /*final Bitmap bitmap = filteredImage.copy(Bitmap.Config.ARGB_8888, true);
+        //final Bitmap bitmap = filteredImage.copy(Bitmap.Config.ARGB_8888, true);
 
-        Filter myFilter = new Filter();
+        /*Filter myFilter = new Filter();
         myFilter.addSubFilter(new BrightnessSubFilter(brightnessFinal));
         myFilter.addSubFilter(new ContrastSubFilter(contrastFinal));
-        myFilter.addSubFilter(new SaturationSubfilter(saturationFinal));
-        finalImage = myFilter.processFilter(bitmap);*/
+        myFilter.addSubFilter(new SaturationSubfilter(saturationFinal));*/
+        //finalImage = myFilter.processFilter(bitmap);
+
+
+
     }
 
     /**
@@ -233,14 +237,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
     }
 
-    // load the default image from assets on app launch
-//    private void loadImage() {
-//        originalImage = BitmapUtils.getBitmapFromAssets(this, IMAGE_NAME, 300, 300);
-//        filteredImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
-//        finalImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
-//        imagePreview.setImageBitmap(originalImage);
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -267,16 +263,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == SELECT_GALLERY_IMAGE) {
-//            Bitmap bitmap = BitmapUtils.getBitmapFromGallery(this, data.getData(), 800, 800);
-
-            // clear bitmap memory
-//            originalImage.recycle();
-//            finalImage.recycle();
-//            finalImage.recycle();
-//
-//            originalImage = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-//            filteredImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
-//            finalImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
 
             Bitmap imageBitmap = null;
             String imagePath = "";
@@ -301,7 +287,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 filteredImage = imageBitmap.copy(imageBitmap.getConfig(),true);
                 finalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
                 imagePreview.setImageBitmap(imageBitmap);
-//            bitmap.recycle();
 
                 // render selected image thumbnails
                 filtersListFragment.prepareThumbnail(originalImage);
@@ -348,6 +333,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
+                            imagePreview.buildDrawingCache();
+                            finalImage = imagePreview.getDrawingCache();
                             final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
                             if (!TextUtils.isEmpty(path)) {
                                 Snackbar snackbar = Snackbar
@@ -396,9 +383,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     imagePreview.setColorFilter(setBrightness(progress));
                     break;
                 case R.id.seekbar_contrast:
-                    SeekBar seekBarContrast = findViewById(R.id.seekbar_contrast);
-                    progress = Math.round(seekBarContrast.getProgress()/smoothnessFactor);
-                    contrastAndBrightnessControler(filteredImage,progress, (float) 0.7);
+                    ColorMatrixColorFilter filter = setContrast((float) progress);
+                    imagePreview.setColorFilter(filter);
                     break;
                 case R.id.seekbar_saturation:
                     break;
@@ -409,8 +395,21 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
 
         public void onStopTrackingTouch(SeekBar seekBar) {
-            seekBar.setProgress(Math.round((seekBar.getProgress() + (smoothnessFactor / 2)) / smoothnessFactor) * smoothnessFactor);
+//            seekBar.setProgress(Math.round((seekBar.getProgress() + (smoothnessFactor / 2)) / smoothnessFactor) * smoothnessFactor);
         }
+    }
+
+    private ColorMatrixColorFilter setContrast(float progress) {
+        float scale = progress + 1.f;
+        float translate = (-.5f * scale + .5f) * 255.f;
+        float[] array = new float[] {
+                scale, 0, 0, 0, translate,
+                0, scale, 0, 0, translate,
+                0, 0, scale, 0, translate,
+                0, 0, 0, 1, 0};
+        ColorMatrix matrix = new ColorMatrix(array);
+        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+        return filter;
     }
 
     public static PorterDuffColorFilter setBrightness(int progress) {
@@ -426,22 +425,4 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
     }
 
-    public void contrastAndBrightnessControler(Bitmap bitmap, float contrast, float brightness)
-    {
-        ColorMatrix cmatrix = new ColorMatrix(new float[]
-                {
-                        contrast, 0, 0, 0, brightness,
-                        0, contrast, 0, 0, brightness,
-                        0, 0, contrast, 0, brightness,
-                        0, 0, 0, 1, 0
-                });
-        Bitmap ret =Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), bitmap.getConfig());
-        Canvas canvas = new Canvas(ret);
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(cmatrix));
-        canvas.drawBitmap(bitmap, 0, 0, paint);
-        imagePreview.setImageBitmap(ret);
-    }
-
-    //test commit charan updated to new version
 }

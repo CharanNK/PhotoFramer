@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://D:\AndroidStudioProjects\PhotoFramerGit\PhotoFramer.iml" filepath="D:\AndroidStudioProjects\PhotoFramerGit\PhotoFramer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/PhotoFramerGit.iml" filepath="$PROJECT_DIR$/PhotoFramerGit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PhotoFramer.iml" filepath="$PROJECT_DIR$/PhotoFramer.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://D:\AndroidStudioProjects\PhotoFramerGit\app\app.iml" filepath="D:\AndroidStudioProjects\PhotoFramerGit\app\app.iml" />
     </modules>
   </component>
 </project>

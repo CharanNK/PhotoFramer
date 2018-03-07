@@ -442,4 +442,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         canvas.drawBitmap(bitmap, 0, 0, paint);
         imagePreview.setImageBitmap(ret);
     }
+
+    //test commit charan updated to new version
 }

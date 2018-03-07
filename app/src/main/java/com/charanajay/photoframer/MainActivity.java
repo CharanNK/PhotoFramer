@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.activity_title_main));
 
         // loadImage();
@@ -170,13 +169,17 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     @Override
     public void onEditStarted() {
-        sliderListener brightnessSldListener = new sliderListener();
+        sliderListener mySliderListener = new sliderListener();
         SeekBar brightnessBar = findViewById(R.id.seekbar_brightness);
-        brightnessBar.setOnSeekBarChangeListener(brightnessSldListener);
+        brightnessBar.setOnSeekBarChangeListener(mySliderListener);
 
-        sliderListener contrastsldListener = new sliderListener();
         SeekBar contrastBar = findViewById(R.id.seekbar_contrast);
-        contrastBar.setOnSeekBarChangeListener(contrastsldListener);
+        contrastBar.incrementProgressBy(1);
+        contrastBar.setOnSeekBarChangeListener(mySliderListener);
+
+        SeekBar saturationBar = findViewById(R.id.seekbar_saturation);
+        saturationBar.incrementProgressBy(1);
+        saturationBar.setOnSeekBarChangeListener(mySliderListener);
     }
 
     @Override
@@ -387,6 +390,10 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     imagePreview.setColorFilter(filter);
                     break;
                 case R.id.seekbar_saturation:
+                    ColorMatrix colorMatrix = new ColorMatrix();
+                    colorMatrix.setSaturation(progress);
+                    ColorMatrixColorFilter colorMatrixColorFilter = new ColorMatrixColorFilter(colorMatrix);
+                    imagePreview.setColorFilter(colorMatrixColorFilter);
                     break;
             }
         }

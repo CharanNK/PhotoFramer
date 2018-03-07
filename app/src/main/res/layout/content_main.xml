@@ -10,11 +10,12 @@
     tools:context="com.charanajay.photoframer.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <ImageView
+    <com.charanajay.photoframer.ZoomableImageView
         android:id="@+id/image_preview"
         android:layout_width="match_parent"
         android:layout_height="360dp"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"/>
 
     <com.charanajay.photoframer.utils.NonSwipeableViewPager
         android:id="@+id/viewpager"

@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     private Uri imageCapturedURI = null;
 
     @BindView(R.id.image_preview)
-    ImageView imagePreview;
+    ZoomableImageView imagePreview;
 
     @BindView(R.id.tabs)
     TabLayout tabLayout;

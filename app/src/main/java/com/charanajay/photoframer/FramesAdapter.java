@@ -94,7 +94,7 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
         Canvas canvas = new Canvas(result);
         canvas.drawBitmap(firstImage, 0f, 0f, null);
         int x = canvas.getWidth()-secondImage.getWidth();
-        int y = canvas.getWidth()-secondImage.getHeight();
+        int y = canvas.getHeight()-secondImage.getHeight();
         canvas.drawBitmap(secondImage, x, y, null);
         return result;
     }

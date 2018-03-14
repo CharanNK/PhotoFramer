@@ -25,8 +25,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +49,7 @@ import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,11 +89,13 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     FiltersListFragment filtersListFragment;
     EditImageFragment editImageFragment;
+    FrameListFragment frameListFragment;
 
     // modified image values
     int brightnessFinal = 0;
     float saturationFinal = 1.0f;
     float contrastFinal = 1.0f;
+
 
     // load native image filters library
     static {
@@ -124,8 +130,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         editImageFragment = new EditImageFragment();
         editImageFragment.setListener(this);
 
+        frameListFragment = new FrameListFragment();
+
         adapter.addFragment(filtersListFragment, getString(R.string.tab_filters));
         adapter.addFragment(editImageFragment, getString(R.string.tab_edit));
+        adapter.addFragment(frameListFragment,"FRAMES");
 
         viewPager.setAdapter(adapter);
     }
@@ -290,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 filteredImage = imageBitmap.copy(imageBitmap.getConfig(),true);
                 finalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
                 imagePreview.setImageBitmap(imageBitmap);
+
 
                 // render selected image thumbnails
                 filtersListFragment.prepareThumbnail(originalImage);

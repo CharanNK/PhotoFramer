@@ -7,11 +7,14 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+
+import com.charanajay.photoframer.utils.SpacesItemDecoration;
 
 import java.util.ArrayList;
 
@@ -47,24 +50,25 @@ public class FrameListFragment extends Fragment {
 
         frameNames.add("RCB");
         frameNames.add("CupNamde");
-        frameNames.add("MI");
-        frameNames.add("KKR");
-        frameNames.add("CSK");
-        frameNames.add("Delhi");
-        frameNames.add("Rajastan");
+        frameNames.add("RCB Playbold");
+        frameNames.add("CSK Dhoni");
+        frameNames.add("Whistle Podu");
+        frameNames.add("Mumbai Indians");
 
         frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.rcbbasic);
+        frames.add(R.drawable.cupnamde);
+        frames.add(R.drawable.rcbplaybold);
+        frames.add(R.drawable.cskdhoni);
+        frames.add(R.drawable.cskback);
+        frames.add(R.drawable.mumbai_indians);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false);
         RecyclerView recyclerView = view.findViewById(R.id.frames_recycler_view);
         recyclerView.setLayoutManager(layoutManager);
         FramesAdapter framesAdapter = new FramesAdapter(frameNames,frames,getContext());
+        int space = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8,
+                getResources().getDisplayMetrics());
+        recyclerView.addItemDecoration(new SpacesItemDecoration(space));
         recyclerView.setAdapter(framesAdapter);
 
     }

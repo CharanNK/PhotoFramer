@@ -13,6 +13,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -69,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     @BindView(R.id.image_preview)
     ZoomableImageView imagePreview;
+
+    @BindView(R.id.framer)
+    ImageView framer;
 
     @BindView(R.id.tabs)
     TabLayout tabLayout;
@@ -317,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     }
 
     private void openImageFromGallery() {
+        framer.setImageResource(android.R.color.transparent);
         Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
@@ -346,8 +351,15 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
-                            imagePreview.buildDrawingCache();
-                            finalImage = imagePreview.getDrawingCache();
+                            BitmapDrawable userImagedrawable = (BitmapDrawable) imagePreview.getDrawable();
+                            Bitmap userImage = userImagedrawable.getBitmap();
+
+                            BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
+                            Bitmap selectedFrame = frameImageDrawable.getBitmap();
+
+                            finalImage = createSingleImageFromMultipleImages(userImage,selectedFrame);
+//                            imagePreview.buildDrawingCache();
+//                            finalImage = imagePreview.getDrawingCache();
                             final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
                             if (!TextUtils.isEmpty(path)) {
                                 Snackbar snackbar = Snackbar
@@ -442,4 +454,15 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
     }
 
+    private Bitmap createSingleImageFromMultipleImages(Bitmap firstImage, Bitmap secondImage){
+        Bitmap result = Bitmap.createBitmap(firstImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
+        Canvas canvas = new Canvas(result);
+//        canvas.drawBitmap(firstImage, 0f, 0f, null);
+//        int x = canvas.getWidth()-secondImage.getWidth();
+//        int y = canvas.getHeight()-secondImage.getHeight();
+//        canvas.drawBitmap(secondImage, x, y, null);
+        canvas.drawBitmap(firstImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
+        canvas.drawBitmap(secondImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
+        return result;
+    }
 }

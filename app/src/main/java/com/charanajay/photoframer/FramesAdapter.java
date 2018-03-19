@@ -44,7 +44,7 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Log.d(TAG,"onCreateViewHolder:called");
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_list_item,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.frames_list_item,parent,false);
         imagePreview = ((Activity)mContext).findViewById(R.id.image_preview);
         framer = ((Activity)mContext).findViewById(R.id.framer);
         return new ViewHolder(view);
@@ -56,7 +56,7 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
 
         holder.frameThumbnail.setImageResource(frames.get(position));
 
-        holder.frameName.setText(frameNames.get(position));
+//        holder.frameName.setText(frameNames.get(position));
         holder.frameThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,13 +80,13 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView frameName;
+//        TextView frameName;
         ImageView frameThumbnail;
         public ViewHolder(View itemView) {
             super(itemView);
 
-            frameName = itemView.findViewById(R.id.filter_name);
-            frameThumbnail = itemView.findViewById(R.id.thumbnail);
+//            frameName = itemView.findViewById(R.id.filter_name);
+            frameThumbnail = itemView.findViewById(R.id.frame_thumbnail);
 
         }
     }

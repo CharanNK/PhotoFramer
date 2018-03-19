@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,8 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
 
     FiltersListFragmentListener listener;
 
+    private String TAG = "FiltersListFragment";
+
     public void setListener(FiltersListFragmentListener listener) {
         this.listener = listener;
     }
@@ -53,6 +56,8 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_filters_list, container, false);
+
+        Log.d(TAG,"onCreateView:called");
 
         ButterKnife.bind(this, view);
 

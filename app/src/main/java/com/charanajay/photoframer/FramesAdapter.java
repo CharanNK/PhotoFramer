@@ -2,6 +2,7 @@ package com.charanajay.photoframer;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -28,14 +29,12 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
 
     private static final String TAG = "FramesAdapterRecycler";
 
-    private ArrayList<String> frameNames = new ArrayList<String>();
     private ArrayList<Integer> frames = new ArrayList<Integer>();
     private Context mContext;
 
     ImageView imagePreview,framer;
 
-    public FramesAdapter(ArrayList<String> frameNames, ArrayList<Integer> frames, Context mContext) {
-        this.frameNames = frameNames;
+    public FramesAdapter( ArrayList<Integer> frames, Context mContext) {
         this.frames = frames;
         this.mContext = mContext;
     }
@@ -54,50 +53,32 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder holder, final int position) {
         Log.d(TAG,"onBindViewHolder:called");
 
-        holder.frameThumbnail.setImageResource(frames.get(position));
+        Bitmap imgscale = decodeSampledBitmapFromResource(frames.get(position),100,100,mContext);
+        holder.frameThumbnail.setImageBitmap(imgscale);
 
-//        holder.frameName.setText(frameNames.get(position));
         holder.frameThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG,"onclick:clicked on an image"+frameNames.get(position));
-//                Toast.makeText(mContext,frameNames.get(position),Toast.LENGTH_LONG).show();
+                Log.d(TAG,"onclick:clicked on an image"+frames.get(position));
 
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                final int REQUIRED_SIZE = 200;
-                int scale = 1;
-                while (options.outWidth / scale / 2 >= REQUIRED_SIZE
-                        && options.outHeight / scale / 2 >= REQUIRED_SIZE)
-                    scale *= 2;
-                options.inSampleSize = scale;
-                options.inJustDecodeBounds = false;
-
-                Bitmap frameBitmap = BitmapFactory.decodeResource(mContext.getResources(),frames.get(position),options);
+                Bitmap frameBitmap = decodeSampledBitmapFromResource(frames.get(position),800,800,mContext);
 
                 framer.setImageBitmap(frameBitmap);
 
-//                Bitmap bigImage = ((BitmapDrawable)imagePreview.getDrawable()).getBitmap();
-//                Bitmap smallImage = BitmapFactory.decodeResource(mContext.getResources(), frames.get(position));
-//                Bitmap mergedImages = createSingleImageFromMultipleImages(bigImage, smallImage);
-//
-//                imagePreview.setImageBitmap(mergedImages);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return frameNames.size();
+        return frames.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-//        TextView frameName;
         ImageView frameThumbnail;
         public ViewHolder(View itemView) {
             super(itemView);
 
-//            frameName = itemView.findViewById(R.id.filter_name);
             frameThumbnail = itemView.findViewById(R.id.frame_thumbnail);
 
         }
@@ -113,5 +94,44 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
         canvas.drawBitmap(firstImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
         canvas.drawBitmap(secondImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
         return result;
+    }
+
+    public static Bitmap decodeSampledBitmapFromResource(int resId, int reqWidth, int reqHeight,Context context) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(context.getResources(),resId, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inDither = true;
+        return BitmapFactory.decodeResource(context.getResources(),resId, options);
+    }
+
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+// Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 3;
+            final int halfWidth = width / 3;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
     }
 }

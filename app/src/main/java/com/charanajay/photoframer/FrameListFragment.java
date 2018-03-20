@@ -28,32 +28,17 @@ public class FrameListFragment extends Fragment {
     View view;
     String bitmap;
 
-//    public static final FrameListFragment newInstance(String bitmap){
-//        FrameListFragment frameListFragment = new FrameListFragment();
-//        Bundle bundle = new Bundle(1);
-//        bundle.putString("bitmap",bitmap);
-//        frameListFragment.setArguments(bundle);
-//        return frameListFragment;
-//    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_frames_list,container,false);
+        view = inflater.inflate(R.layout.fragment_frames_list, container, false);
         initFrameRecycler();
         return view;
     }
-    public void initFrameRecycler(){
+
+    public void initFrameRecycler() {
         Log.d("FrameRecycler", "initFrameRecycler:called");
 
-        ArrayList<String> frameNames = new ArrayList<String>();
         ArrayList<Integer> frames = new ArrayList<Integer>();
-
-        frameNames.add("RCB");
-        frameNames.add("CupNamde");
-        frameNames.add("RCB Playbold");
-        frameNames.add("CSK Dhoni");
-        frameNames.add("Whistle Podu");
-        frameNames.add("Mumbai Indians");
 
         frames.add(R.drawable.rcbbasic);
         frames.add(R.drawable.cupnamde);
@@ -61,11 +46,12 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.cskdhoni);
         frames.add(R.drawable.cskback);
         frames.add(R.drawable.mumbai_indians);
+        frames.add(R.drawable.cskwhistle);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = view.findViewById(R.id.frames_recycler_view);
         recyclerView.setLayoutManager(layoutManager);
-        FramesAdapter framesAdapter = new FramesAdapter(frameNames,frames,getContext());
+        FramesAdapter framesAdapter = new FramesAdapter(frames, getContext());
         int space = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8,
                 getResources().getDisplayMetrics());
         recyclerView.addItemDecoration(new SpacesItemDecoration(space));

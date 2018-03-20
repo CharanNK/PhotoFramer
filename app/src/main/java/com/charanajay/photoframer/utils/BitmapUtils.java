@@ -14,6 +14,8 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,16 +35,16 @@ public class BitmapUtils {
      * @return
      */
     public static Bitmap getBitmapFromAssets(Context context, String fileName, int width, int height) {
-        AssetManager assetManager = context.getAssets();
-
+//        AssetManager assetManager = context.getAssets();
+        Log.d(TAG,"Filename here:"+fileName);
         InputStream istr;
         Bitmap bitmap = null;
         try {
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-
-            istr = assetManager.open(fileName);
-
+            File imageFile = new File(fileName.trim());
+//            istr = assetManager.open(fileName.trim());
+            istr = new FileInputStream(imageFile);
             // Calculate inSampleSize
             options.inSampleSize = calculateInSampleSize(options, width, height);
 
@@ -50,7 +52,7 @@ public class BitmapUtils {
             options.inJustDecodeBounds = false;
             return BitmapFactory.decodeStream(istr, null, options);
         } catch (IOException e) {
-            Log.e(TAG, "Exception: " + e.getMessage());
+            Log.e(TAG, "Exception: " +Log.getStackTraceString(e));
         }
 
         return null;

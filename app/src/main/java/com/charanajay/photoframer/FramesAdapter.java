@@ -61,9 +61,21 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
             @Override
             public void onClick(View view) {
                 Log.d(TAG,"onclick:clicked on an image"+frameNames.get(position));
-                Toast.makeText(mContext,frameNames.get(position),Toast.LENGTH_LONG).show();
+//                Toast.makeText(mContext,frameNames.get(position),Toast.LENGTH_LONG).show();
 
-                framer.setImageResource(frames.get(position));
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                final int REQUIRED_SIZE = 200;
+                int scale = 1;
+                while (options.outWidth / scale / 2 >= REQUIRED_SIZE
+                        && options.outHeight / scale / 2 >= REQUIRED_SIZE)
+                    scale *= 2;
+                options.inSampleSize = scale;
+                options.inJustDecodeBounds = false;
+
+                Bitmap frameBitmap = BitmapFactory.decodeResource(mContext.getResources(),frames.get(position),options);
+
+                framer.setImageBitmap(frameBitmap);
 
 //                Bitmap bigImage = ((BitmapDrawable)imagePreview.getDrawable()).getBitmap();
 //                Bitmap smallImage = BitmapFactory.decodeResource(mContext.getResources(), frames.get(position));

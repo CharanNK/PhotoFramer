@@ -3,6 +3,7 @@ package com.charanajay.photoframer;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ public class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.My
     private ThumbnailsAdapterListener listener;
     private Context mContext;
     private int selectedIndex = 0;
+    private String TAG = "ThumbNailsAdapter";
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.thumbnail)
@@ -60,7 +62,7 @@ public class ThumbnailsAdapter extends RecyclerView.Adapter<ThumbnailsAdapter.My
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         final ThumbnailItem thumbnailItem = thumbnailItemList.get(position);
-
+        Log.d(TAG,"onBindViewHolder called");
         holder.thumbnail.setImageBitmap(thumbnailItem.image);
 
         holder.thumbnail.setOnClickListener(new View.OnClickListener() {

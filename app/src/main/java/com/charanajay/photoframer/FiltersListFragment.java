@@ -89,6 +89,7 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
                 Bitmap thumbImage;
 
                 if (bitmap == null) {
+                    Log.d(TAG,"Filename while calling"+MainActivity.IMAGE_NAME);
                     thumbImage = BitmapUtils.getBitmapFromAssets(getActivity(), MainActivity.IMAGE_NAME, 100, 100);
                 } else {
                     thumbImage = Bitmap.createScaledBitmap(bitmap, 100, 100, false);

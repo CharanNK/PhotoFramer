@@ -121,6 +121,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
+
+        openImageFromGallery();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -320,8 +322,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         return cursor.getString(column_index);
     }
 
-    private void openImageFromGallery() {
-        framer.setImageResource(android.R.color.transparent);
+    public void openImageFromGallery() {
+//        framer.setImageResource(android.R.color.transparent);
         Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override

@@ -47,6 +47,12 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.cskback);
         frames.add(R.drawable.mumbai_indians);
         frames.add(R.drawable.cskwhistle);
+        frames.add(R.drawable.roarformore);
+        frames.add(R.drawable.kkr_basic);
+        frames.add(R.drawable.mirecovered);
+        frames.add(R.drawable.iamkkr);
+        frames.add(R.drawable.csklions);
+        frames.add(R.drawable.amikkr);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = view.findViewById(R.id.frames_recycler_view);

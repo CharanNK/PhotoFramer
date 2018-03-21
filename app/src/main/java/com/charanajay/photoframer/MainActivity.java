@@ -127,7 +127,9 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
 
-        openImageFromGallery();
+        imageCapturedURI = getIntent().getData();
+        setCroppedImage(imageCapturedURI);
+        //openImageFromGallery();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -530,5 +532,36 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         canvas.drawBitmap(firstImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
         canvas.drawBitmap(secondImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
         return result;
+    }
+
+    private void setCroppedImage(Uri uri) {
+        Bitmap imageBitmap = null;
+        String imagePath = "";
+        imageCapturedURI = uri;
+        imagePath = imageCapturedURI.getPath();
+        if (imagePath == null)
+            imagePath = imageCapturedURI.getPath();
+        if (imagePath != null) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            final int REQUIRED_SIZE = 200;
+            int scale = 1;
+            while (options.outWidth / scale / 2 >= REQUIRED_SIZE
+                    && options.outHeight / scale / 2 >= REQUIRED_SIZE)
+                scale *= 2;
+            options.inSampleSize = scale;
+            options.inJustDecodeBounds = false;
+            imageBitmap = BitmapFactory.decodeFile(imagePath, options);
+
+            IMAGE_NAME = imagePath;
+            originalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
+            filteredImage = imageBitmap.copy(imageBitmap.getConfig(), true);
+            finalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
+            imagePreview.setImageBitmap(imageBitmap);
+
+
+            // render selected image thumbnails
+//            filtersListFragment.prepareThumbnail(originalImage);
+        }
     }
 }

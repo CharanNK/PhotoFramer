@@ -3,8 +3,9 @@
     package="com.charanajay.photoframer">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
@@ -17,7 +18,12 @@
         <activity android:name=".MainActivity">
 
         </activity>
+
         <activity android:name=".ImageOpenActivity">
+
+        </activity>
+
+        <activity android:name=".SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

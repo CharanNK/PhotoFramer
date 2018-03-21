@@ -17,6 +17,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -51,6 +52,9 @@ import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         adapter.addFragment(filtersListFragment, getString(R.string.tab_filters));
         adapter.addFragment(editImageFragment, getString(R.string.tab_edit));
-        adapter.addFragment(frameListFragment,"FRAMES");
+        adapter.addFragment(frameListFragment, "FRAMES");
 
         viewPager.setAdapter(adapter);
     }
@@ -210,7 +214,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         //finalImage = myFilter.processFilter(bitmap);
 
 
-
     }
 
     /**
@@ -271,7 +274,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
 
         if (id == R.id.action_save) {
-            saveImageToGallery();
+            //saveImageToGallery();
+            shareImage();
             return true;
         }
 
@@ -301,8 +305,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 imageBitmap = BitmapFactory.decodeFile(imagePath, options);
 
                 IMAGE_NAME = imagePath;
-                originalImage = imageBitmap.copy(imageBitmap.getConfig(),true);
-                filteredImage = imageBitmap.copy(imageBitmap.getConfig(),true);
+                originalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
+                filteredImage = imageBitmap.copy(imageBitmap.getConfig(), true);
                 finalImage = imageBitmap.copy(imageBitmap.getConfig(), true);
                 imagePreview.setImageBitmap(imageBitmap);
 
@@ -359,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                             BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
                             Bitmap selectedFrame = frameImageDrawable.getBitmap();
 
-                            finalImage = createSingleImageFromMultipleImages(userImage,selectedFrame);
+                            finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
 //                            imagePreview.buildDrawingCache();
 //                            finalImage = imagePreview.getDrawingCache();
                             final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
@@ -393,6 +397,49 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     }
 
+    private void shareImage(){
+        {
+            Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .withListener(new MultiplePermissionsListener() {
+                        @Override
+                        public void onPermissionsChecked(MultiplePermissionsReport report) {
+                            if (report.areAllPermissionsGranted()) {
+                                BitmapDrawable userImagedrawable = (BitmapDrawable) imagePreview.getDrawable();
+                                Bitmap userImage = userImagedrawable.getBitmap();
+
+                                BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
+                                Bitmap selectedFrame = frameImageDrawable.getBitmap();
+
+                                finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
+
+                                Intent share = new Intent(Intent.ACTION_SEND);
+                                share.setType("image/jpeg");
+                                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                                finalImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+                                File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
+                                try {
+                                    f.createNewFile();
+                                    FileOutputStream fo = new FileOutputStream(f);
+                                    fo.write(bytes.toByteArray());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
+                                startActivity(Intent.createChooser(share, "Share Image"));
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                            token.continuePermissionRequest();
+                        }
+                    }).check();
+
+        }
+    }
+
     // opening image in default image viewer app
     private void openImage(String path) {
         Intent intent = new Intent();
@@ -403,6 +450,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     private class sliderListener implements SeekBar.OnSeekBarChangeListener {
         private int smoothnessFactor = 10;
+
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             progress = Math.round(progress / smoothnessFactor);
             switch (seekBar.getId()) {
@@ -433,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     private ColorMatrixColorFilter setContrast(float progress) {
         float scale = progress + 1.f;
         float translate = (-.5f * scale + .5f) * 255.f;
-        float[] array = new float[] {
+        float[] array = new float[]{
                 scale, 0, 0, 0, translate,
                 0, scale, 0, 0, translate,
                 0, 0, scale, 0, translate,
@@ -444,27 +492,24 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     }
 
     public static PorterDuffColorFilter setBrightness(int progress) {
-        if (progress > 0)
-        {
+        if (progress > 0) {
             int value = (int) progress * 255 / 100;
             return new PorterDuffColorFilter(Color.argb(value, 255, 255, 255), PorterDuff.Mode.SRC_OVER);
-        }
-        else
-        {
+        } else {
             int value = (int) (progress * -1) * 255 / 100;
             return new PorterDuffColorFilter(Color.argb(value, 0, 0, 0), PorterDuff.Mode.SRC_ATOP);
         }
     }
 
-    private Bitmap createSingleImageFromMultipleImages(Bitmap firstImage, Bitmap secondImage){
+    private Bitmap createSingleImageFromMultipleImages(Bitmap firstImage, Bitmap secondImage) {
         Bitmap result = Bitmap.createBitmap(firstImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
         Canvas canvas = new Canvas(result);
 //        canvas.drawBitmap(firstImage, 0f, 0f, null);
 //        int x = canvas.getWidth()-secondImage.getWidth();
 //        int y = canvas.getHeight()-secondImage.getHeight();
 //        canvas.drawBitmap(secondImage, x, y, null);
-        canvas.drawBitmap(firstImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
-        canvas.drawBitmap(secondImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
+        canvas.drawBitmap(firstImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
+        canvas.drawBitmap(secondImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
         return result;
     }
 }

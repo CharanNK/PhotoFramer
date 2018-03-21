@@ -32,36 +32,36 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
     private ArrayList<Integer> frames = new ArrayList<Integer>();
     private Context mContext;
 
-    ImageView imagePreview,framer;
+    ImageView imagePreview, framer;
 
-    public FramesAdapter( ArrayList<Integer> frames, Context mContext) {
+    public FramesAdapter(ArrayList<Integer> frames, Context mContext) {
         this.frames = frames;
         this.mContext = mContext;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d(TAG,"onCreateViewHolder:called");
+        Log.d(TAG, "onCreateViewHolder:called");
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.frames_list_item,parent,false);
-        imagePreview = ((Activity)mContext).findViewById(R.id.image_preview);
-        framer = ((Activity)mContext).findViewById(R.id.framer);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.frames_list_item, parent, false);
+        imagePreview = ((Activity) mContext).findViewById(R.id.image_preview);
+        framer = ((Activity) mContext).findViewById(R.id.framer);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        Log.d(TAG,"onBindViewHolder:called");
+        Log.d(TAG, "onBindViewHolder:called");
 
-        Bitmap imgscale = decodeSampledBitmapFromResource(frames.get(position),100,100,mContext);
+        Bitmap imgscale = decodeSampledBitmapFromResource(frames.get(position), 100, 100, mContext);
         holder.frameThumbnail.setImageBitmap(imgscale);
 
         holder.frameThumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG,"onclick:clicked on an image"+frames.get(position));
+                Log.d(TAG, "onclick:clicked on an image" + frames.get(position));
 
-                Bitmap frameBitmap = decodeSampledBitmapFromResource(frames.get(position),800,800,mContext);
+                Bitmap frameBitmap = decodeSampledBitmapFromResource(frames.get(position), 800, 800, mContext);
 
                 framer.setImageBitmap(frameBitmap);
 
@@ -74,8 +74,9 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
         return frames.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView frameThumbnail;
+
         public ViewHolder(View itemView) {
             super(itemView);
 
@@ -84,24 +85,24 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
         }
     }
 
-    private Bitmap createSingleImageFromMultipleImages(Bitmap firstImage, Bitmap secondImage){
+    private Bitmap createSingleImageFromMultipleImages(Bitmap firstImage, Bitmap secondImage) {
         Bitmap result = Bitmap.createBitmap(firstImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
         Canvas canvas = new Canvas(result);
 //        canvas.drawBitmap(firstImage, 0f, 0f, null);
 //        int x = canvas.getWidth()-secondImage.getWidth();
 //        int y = canvas.getHeight()-secondImage.getHeight();
 //        canvas.drawBitmap(secondImage, x, y, null);
-        canvas.drawBitmap(firstImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
-        canvas.drawBitmap(secondImage, null, new Rect(0,0,firstImage.getWidth(),firstImage.getHeight()), new Paint());
+        canvas.drawBitmap(firstImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
+        canvas.drawBitmap(secondImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
         return result;
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(int resId, int reqWidth, int reqHeight,Context context) {
+    public static Bitmap decodeSampledBitmapFromResource(int resId, int reqWidth, int reqHeight, Context context) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeResource(context.getResources(),resId, options);
+        BitmapFactory.decodeResource(context.getResources(), resId, options);
 
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -110,7 +111,7 @@ public class FramesAdapter extends RecyclerView.Adapter<FramesAdapter.ViewHolder
         options.inJustDecodeBounds = false;
         options.inPreferredConfig = Bitmap.Config.RGB_565;
         options.inDither = true;
-        return BitmapFactory.decodeResource(context.getResources(),resId, options);
+        return BitmapFactory.decodeResource(context.getResources(), resId, options);
     }
 
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

@@ -13,4 +13,10 @@
         android:orderInCategory="101"
         android:title="@string/action_save"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_share"
+        android:orderInCategory="102"
+        android:icon="@drawable/ic_share_black_24dp"
+        app:showAsAction="always"/>
 </menu>

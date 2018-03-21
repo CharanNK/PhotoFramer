@@ -3,6 +3,7 @@ package com.charanajay.photoframer;
 import android.Manifest;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -274,7 +275,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
 
         if (id == R.id.action_save) {
-            //saveImageToGallery();
+            saveImageToGallery();
+            return true;
+        }
+
+        if (id == R.id.action_share) {
             shareImage();
             return true;
         }
@@ -361,11 +366,13 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                             Bitmap userImage = userImagedrawable.getBitmap();
 
                             BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
-                            Bitmap selectedFrame = frameImageDrawable.getBitmap();
+                            if (frameImageDrawable != null) {
+                                Bitmap selectedFrame = frameImageDrawable.getBitmap();
 
-                            finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
-//                            imagePreview.buildDrawingCache();
-//                            finalImage = imagePreview.getDrawingCache();
+                                finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
+                            } else {
+                                finalImage = userImage;
+                            }
                             final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
                             if (!TextUtils.isEmpty(path)) {
                                 Snackbar snackbar = Snackbar
@@ -397,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     }
 
-    private void shareImage(){
+    private void shareImage() {
         {
             Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     .withListener(new MultiplePermissionsListener() {
@@ -408,12 +415,24 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                                 Bitmap userImage = userImagedrawable.getBitmap();
 
                                 BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
-                                Bitmap selectedFrame = frameImageDrawable.getBitmap();
+                                if (frameImageDrawable != null) {
+                                    Bitmap selectedFrame = frameImageDrawable.getBitmap();
 
-                                finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
+                                    finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
+                                } else {
+                                    finalImage = userImage;
+                                }
 
                                 Intent share = new Intent(Intent.ACTION_SEND);
                                 share.setType("image/jpeg");
+                                List<ResolveInfo> listGel = getApplicationContext().getPackageManager().queryIntentActivities(share, 0);
+                                for (ResolveInfo res : listGel) {
+                                    Log.e("package", res.activityInfo.packageName);
+                                    Log.e("name", res.activityInfo.name);
+                                    Log.e("proname", res.loadLabel(getApplicationContext().getPackageManager()).toString());
+
+
+                                }
                                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                                 finalImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
                                 File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");

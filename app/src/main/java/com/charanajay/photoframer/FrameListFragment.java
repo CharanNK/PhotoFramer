@@ -48,8 +48,11 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.kkr_iamkkr);
         frames.add(R.drawable.kkr_amikkr);
         frames.add(R.drawable.dd_basic);
-        frames.add(R.drawable.kingsxi1);
+        frames.add(R.drawable.kingsxi_portrait);
+        frames.add(R.drawable.kingsxi_panga);
         frames.add(R.drawable.rajastan_hallabol);
+        frames.add(R.drawable.rajastan_gradient);
+        frames.add(R.drawable.rajastan_portrait);
         frames.add(R.drawable.sunrisers_orange);
         frames.add(R.drawable.sunrisers_basic);
 

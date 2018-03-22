@@ -1,6 +1,7 @@
 package com.charanajay.photoframer;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -425,28 +426,36 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                                     finalImage = userImage;
                                 }
 
-                                Intent share = new Intent(Intent.ACTION_SEND);
-                                share.setType("image/jpeg");
-                                List<ResolveInfo> listGel = getApplicationContext().getPackageManager().queryIntentActivities(share, 0);
-                                for (ResolveInfo res : listGel) {
-                                    Log.e("package", res.activityInfo.packageName);
-                                    Log.e("name", res.activityInfo.name);
-                                    Log.e("proname", res.loadLabel(getApplicationContext().getPackageManager()).toString());
-
-
+                                File file = null;
+                                if(finalImage != null){
+                                    final String dirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Screenshots";
+                                    File dir = new File(dirPath);
+                                    if(!dir.exists())
+                                        dir.mkdirs();
+                                    file = new File(dirPath, finalImage+".jpg");
+                                    try {
+                                        FileOutputStream fOut = new FileOutputStream(file);
+                                        finalImage.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                                        fOut.flush();
+                                        fOut.close();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                                finalImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                                File f = new File(Environment.getExternalStorageDirectory() + File.separator + "temporary_file.jpg");
+
+                                Uri uri = Uri.fromFile(file);
+                                Intent intent = new Intent();
+                                intent.setAction(Intent.ACTION_SEND);
+                                intent.setType("image/jpeg");
+                                String str = "https://play.google.com/store/apps/details?id=" + getPackageName();
+                                intent.putExtra(android.content.Intent.EXTRA_TEXT, "Find more cool frames of your favorite teams\n\nDownload IPL Photo Framer:\n"+str);
+                                intent.putExtra(Intent.EXTRA_STREAM, uri);
                                 try {
-                                    f.createNewFile();
-                                    FileOutputStream fo = new FileOutputStream(f);
-                                    fo.write(bytes.toByteArray());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+                                    startActivity(Intent.createChooser(intent, "Share Image"));
+                                } catch (ActivityNotFoundException e) {
+                                    Toast.makeText(getBaseContext(), "No App Available", Toast.LENGTH_SHORT).show();
                                 }
-                                share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
-                                startActivity(Intent.createChooser(share, "Share Image"));
+
                             } else {
                                 Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
                             }

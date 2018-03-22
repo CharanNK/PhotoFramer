@@ -1,7 +1,5 @@
 package com.charanajay.photoframer;
 
-import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,14 +9,11 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 
 import com.charanajay.photoframer.utils.SpacesItemDecoration;
 
 import java.util.ArrayList;
-
-import butterknife.ButterKnife;
 
 /**
  * Created by charank on 13-03-2018.
@@ -40,18 +35,23 @@ public class FrameListFragment extends Fragment {
 
         ArrayList<Integer> frames = new ArrayList<Integer>();
 
-        frames.add(R.drawable.rcbbasic);
-        frames.add(R.drawable.cupnamde);
-        frames.add(R.drawable.rcbplaybold);
-        frames.add(R.drawable.cskdhoni);
-        frames.add(R.drawable.cskback);
-        frames.add(R.drawable.mumbai_indians);
-        frames.add(R.drawable.cskwhistle);
-        frames.add(R.drawable.roarformore);
+        frames.add(R.drawable.rcb_basic);
+        frames.add(R.drawable.rcb_cupnamde);
+        frames.add(R.drawable.rcb_playbold);
+        frames.add(R.drawable.csk_dhoni);
+        frames.add(R.drawable.csk_kingsback);
+        frames.add(R.drawable.csk_whistle);
+        frames.add(R.drawable.csk_roarformore);
+        frames.add(R.drawable.mi_basic);
+        frames.add(R.drawable.mi_dilse);
         frames.add(R.drawable.kkr_basic);
-        frames.add(R.drawable.mirecovered);
-        frames.add(R.drawable.iamkkr);
-        frames.add(R.drawable.amikkr);
+        frames.add(R.drawable.kkr_iamkkr);
+        frames.add(R.drawable.kkr_amikkr);
+        frames.add(R.drawable.dd_basic);
+        frames.add(R.drawable.kingsxi1);
+        frames.add(R.drawable.rajastan_hallabol);
+        frames.add(R.drawable.sunrisers_orange);
+        frames.add(R.drawable.sunrisers_basic);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = view.findViewById(R.id.frames_recycler_view);

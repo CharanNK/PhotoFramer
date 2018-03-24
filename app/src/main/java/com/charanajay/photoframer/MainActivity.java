@@ -48,6 +48,7 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.soundcloud.android.crop.Crop;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
@@ -89,13 +90,13 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
 
-    Bitmap originalImage;
+    static Bitmap originalImage;
     // to backup image with filter applied
-    Bitmap filteredImage;
+    static Bitmap filteredImage;
 
     // the final image after applying
     // brightness, saturation, contrast
-    Bitmap finalImage;
+    static Bitmap finalImage;
 
     FiltersListFragment filtersListFragment;
     EditImageFragment editImageFragment;
@@ -128,9 +129,9 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
 
-        imageCapturedURI = getIntent().getData();
-        setCroppedImage(imageCapturedURI);
-        //openImageFromGallery();
+//        imageCapturedURI = getIntent().getData();
+//        setCroppedImage(imageCapturedURI);
+        openImageFromGallery();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -292,6 +293,20 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode==RESULT_OK){
+            if(requestCode== Crop.REQUEST_PICK){
+                Uri source_uri = data.getData();
+                Uri destination_uri = Uri.fromFile(new File(getCacheDir(),"cropped"));
+
+                Log.d("destination URI :",destination_uri.toString());
+
+                Crop.of(source_uri,destination_uri).asSquare().start(this);
+//                setCroppedImage(Crop.getOutput(data));
+            }
+            else if(requestCode==Crop.REQUEST_CROP){
+                setCroppedImage(Crop.getOutput(data));
+            }
+        }
         if (resultCode == RESULT_OK && requestCode == SELECT_GALLERY_IMAGE) {
 
             Bitmap imageBitmap = null;
@@ -335,8 +350,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     }
 
     public void openImageFromGallery() {
-//        framer.setImageResource(android.R.color.transparent);
-        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        framer.setImageResource(0);
+        /*Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -353,7 +368,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
                         token.continuePermissionRequest();
                     }
-                }).check();
+                }).check();*/    //works without crop. do not remove keeping it for record
+        Crop.pickImage(this);
     }
 
     /*
@@ -417,13 +433,14 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                                 BitmapDrawable userImagedrawable = (BitmapDrawable) imagePreview.getDrawable();
                                 Bitmap userImage = userImagedrawable.getBitmap();
 
-                                BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
-                                if (frameImageDrawable != null) {
-                                    Bitmap selectedFrame = frameImageDrawable.getBitmap();
 
-                                    finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
-                                } else {
+                                if (framer.getDrawable() == null) {
                                     finalImage = userImage;
+
+                                } else {
+                                    BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
+                                    Bitmap selectedFrame = frameImageDrawable.getBitmap();
+                                    finalImage = createSingleImageFromMultipleImages(userImage, selectedFrame);
                                 }
 
                                 File file = null;
@@ -570,7 +587,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
 
             // render selected image thumbnails
-//            filtersListFragment.prepareThumbnail(originalImage);
+            filtersListFragment.prepareThumbnail(originalImage);
         }
     }
 }

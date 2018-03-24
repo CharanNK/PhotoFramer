@@ -41,9 +41,9 @@ public class ImageOpenActivity extends AppCompatActivity{
         openPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(ImageOpenActivity.this,MainActivity.class);
-//                startActivity(intent);
-                openGallery(view);
+                Intent intent = new Intent(ImageOpenActivity.this,MainActivity.class);
+                startActivity(intent);
+//                openGallery(view);
             }
         });
     }

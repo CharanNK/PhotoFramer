@@ -49,6 +49,7 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.soundcloud.android.crop.Crop;
+import com.yalantis.ucrop.UCrop;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
@@ -300,11 +301,14 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
                 Log.d("destination URI :",destination_uri.toString());
 
-                Crop.of(source_uri,destination_uri).asSquare().start(this);
+                UCrop.of(source_uri, destination_uri)
+                        .withAspectRatio(1, 1)
+                        //.withMaxResultSize(800, 800)
+                        .start(this);
 //                setCroppedImage(Crop.getOutput(data));
             }
-            else if(requestCode==Crop.REQUEST_CROP){
-                setCroppedImage(Crop.getOutput(data));
+            else if(requestCode==UCrop.REQUEST_CROP){
+                setCroppedImage(UCrop.getOutput(data));
             }
         }
         if (resultCode == RESULT_OK && requestCode == SELECT_GALLERY_IMAGE) {
@@ -351,14 +355,15 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     public void openImageFromGallery() {
         framer.setImageResource(0);
-        /*Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
-                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            intent.setType("image/*");
-                            startActivityForResult(intent, SELECT_GALLERY_IMAGE);
+//                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//                            intent.setType("image/*");
+//                            startActivityForResult(intent, SELECT_GALLERY_IMAGE);
+                                callCroper();
                         } else {
                             Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
                         }
@@ -368,7 +373,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
                         token.continuePermissionRequest();
                     }
-                }).check();*/    //works without crop. do not remove keeping it for record
+                }).check();    //works without crop. do not remove keeping it for record
+
+    }
+
+    public void callCroper(){
         Crop.pickImage(this);
     }
 

@@ -38,6 +38,7 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.rcb_basic);
         frames.add(R.drawable.rcb_cupnamde);
         frames.add(R.drawable.rcb_playbold);
+        frames.add(R.drawable.rcb_sidekannada);
         frames.add(R.drawable.csk_dhoni);
         frames.add(R.drawable.csk_kingsback);
         //frames.add(R.drawable.csk_whistle);
@@ -50,10 +51,8 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.kkr_korbo);
         frames.add(R.drawable.kkr_amikkr);
         frames.add(R.drawable.dd_basic);
-        frames.add(R.drawable.kkr_reduced);
         frames.add(R.drawable.kingsxi_portrait);
         frames.add(R.drawable.kingsxi_panga);
-        //frames.add(R.drawable.kingsxi_red);
         frames.add(R.drawable.rajastan_hallabol);
         frames.add(R.drawable.rajastan_gradient);
         frames.add(R.drawable.rajastan_portrait);

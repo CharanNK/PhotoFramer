@@ -390,8 +390,12 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
-                            BitmapDrawable userImagedrawable = (BitmapDrawable) imagePreview.getDrawable();
-                            Bitmap userImage = userImagedrawable.getBitmap();
+//                            BitmapDrawable userImagedrawable = (BitmapDrawable) imagePreview.getDrawable();
+//                            Bitmap userImage = userImagedrawable.getBitmap();
+
+                            View imageView = (ImageView) findViewById(R.id.image_preview);
+                            imageView.setDrawingCacheEnabled(true);
+                            Bitmap userImage = Bitmap.createBitmap(imageView.getDrawingCache());
 
                             BitmapDrawable frameImageDrawable = (BitmapDrawable) framer.getDrawable();
                             if (frameImageDrawable != null) {

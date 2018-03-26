@@ -12,11 +12,13 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:id="@+id/splash"
-        android:background="@drawable/left" />
+        android:background="@drawable/left"
+        android:contentDescription="Charan"/>
     <ImageView
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:id="@+id/splash1"
-        android:background="@drawable/right" />
+        android:background="@drawable/right"
+        android:contentDescription="Bhatta"/>
 
 </LinearLayout>

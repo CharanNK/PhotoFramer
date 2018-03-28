@@ -3,6 +3,8 @@ package com.charanajay.photoframer;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -23,9 +25,6 @@ import butterknife.ButterKnife;
  */
 
 public class ImageOpenActivity extends AppCompatActivity{
-    @BindView(R.id.open_photo_image)
-    ImageView openPhoto;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,53 +33,33 @@ public class ImageOpenActivity extends AppCompatActivity{
 
         ButterKnife.bind(this);
 
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.activity_title_main));
-
-        openPhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ImageOpenActivity.this,MainActivity.class);
-                startActivity(intent);
-//                openGallery(view);
-            }
-        });
+    }
+    public void openImageFromGallery(View view){
+        Intent intent = new Intent(this,MainActivity.class);
+        intent.putExtra("selectionType","gallery");
+        startActivity(intent);
     }
 
-    private void openGallery(View view) {
-        Crop.pickImage(this);
+    public void openImageFromCamera(View view){
+        Intent intent = new Intent(this,MainActivity.class);
+        intent.putExtra("selectionType","camera");
+        startActivity(intent);
     }
+    public void openSavedPhotos(View view){
+        File sdDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+//        File f = new File(sdDir, "Pictures");
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(resultCode==RESULT_OK){
-            if(requestCode==Crop.REQUEST_PICK){
-                Uri source_uri = data.getData();
-                Uri destination_uri = Uri.fromFile(new File(getCacheDir(),"cropped"));
-
-                Log.d("destination URI :",destination_uri.toString());
-
-                Crop.of(source_uri,destination_uri).asSquare().start(this);
-                openPhoto.setImageURI(Crop.getOutput(data));
-            }
-            else if(requestCode==Crop.REQUEST_CROP){
-                handleCrop(resultCode,data);
-            }
-        }
-    }
-
-    private void handleCrop(int resultCode, Intent data) {
-        if(resultCode == RESULT_OK){
-            Intent intent = new Intent(ImageOpenActivity.this,MainActivity.class);
-            intent.putExtra("imageUri",Crop.getOutput(data));
-            intent.setData(Crop.getOutput(data));
-            startActivity(intent);
-//            openPhoto.setImageURI(Crop.getOutput(data));
-        }else if(resultCode == Crop.RESULT_ERROR){
-            Toast.makeText(this.getApplicationContext(),"Error while cropping",Toast.LENGTH_SHORT).show();
-        }
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath() + "/Pictures");
+        intent.setDataAndType(Uri.withAppendedPath(Uri.fromFile(sdDir), "/Pictures"), "image/*");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(Intent.createChooser(intent, "Open images"));
+        startActivity(intent);
     }
 }

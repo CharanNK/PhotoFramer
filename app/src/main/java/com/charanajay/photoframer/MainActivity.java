@@ -69,6 +69,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements FiltersListFragment.FiltersListFragmentListener, EditImageFragment.EditImageFragmentListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int CAMERA_PIC_REQUEST = 102;
 
     public static String IMAGE_NAME = "";
 
@@ -132,7 +133,12 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
 //        imageCapturedURI = getIntent().getData();
 //        setCroppedImage(imageCapturedURI);
-        openImageFromGallery();
+
+        Intent intent = getIntent();
+        String selectionType = intent.getStringExtra("selectionType");
+        if(selectionType.equals("gallery"))
+            openImageFromGallery();
+        else openCamera();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -307,6 +313,19 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                         .start(this);
 //                setCroppedImage(Crop.getOutput(data));
             }
+            if (requestCode == CAMERA_PIC_REQUEST && resultCode == RESULT_OK) {
+                Log.d("x", "called camera pick");
+                Uri source_uri = imageCapturedURI;
+                Log.d("Sourceuri :", source_uri.toString());
+                Uri destination_uri = Uri.fromFile(new File(getCacheDir(), "cropped"));
+
+                Log.d("destination URI :", destination_uri.toString());
+
+                UCrop.of(source_uri, destination_uri)
+                        .withAspectRatio(1, 1)
+                        //.withMaxResultSize(800,800)
+                        .start(this);
+            }
             else if(requestCode==UCrop.REQUEST_CROP){
                 setCroppedImage(UCrop.getOutput(data));
             }
@@ -375,6 +394,45 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                     }
                 }).check();    //works without crop. do not remove keeping it for record
 
+    }
+
+    public void openCamera() {
+        Log.d("CAMERA", "called function");
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if (report.areAllPermissionsGranted()) {
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            String dirName = String.valueOf(System.currentTimeMillis() + ".jpg");
+                            File appTempDir = new File(Environment.getExternalStorageDirectory().getPath()+"/IPLFramer/Temp/temp");
+                            if(!appTempDir.exists()){
+                                File appDir =  new File("/sdcard/IPLFramer/Temp");
+                                appDir.mkdirs();
+                            }
+                            File file = new File(appTempDir+dirName);
+                            try {
+
+                                imageCapturedURI = Uri.fromFile(file);
+                                Log.d("CapturedURI", imageCapturedURI.toString());
+                                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageCapturedURI);
+                                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                intent.putExtra("return data", true);
+
+                                startActivityForResult(intent, CAMERA_PIC_REQUEST);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
     }
 
     public void callCroper(){

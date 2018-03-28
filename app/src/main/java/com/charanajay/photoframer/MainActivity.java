@@ -43,6 +43,7 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.charanajay.photoframer.utils.*;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     float saturationFinal = 1.0f;
     float contrastFinal = 1.0f;
 
-
+    private RewardedVideoAd mRewardedVideoAd;
     // load native image filters library
     static {
         System.loadLibrary("NativeImageProcessor");

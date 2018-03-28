@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "771273153391",
+    "firebase_url": "https://photoframer-c661a.firebaseio.com",
+    "project_id": "photoframer-c661a",
+    "storage_bucket": "photoframer-c661a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771273153391:android:a6bb87d4688730ab",
+        "android_client_info": {
+          "package_name": "com.charanajay.photoframer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "771273153391-mor08qam2gi9r4fuvkefsvn9ut6rp20q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdcizRWY2dWy2R_9XXodUP1MSQvgwnh-Q"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

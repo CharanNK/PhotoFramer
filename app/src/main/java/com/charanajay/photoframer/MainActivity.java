@@ -43,6 +43,9 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.charanajay.photoframer.utils.*;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     float contrastFinal = 1.0f;
 
     private RewardedVideoAd mRewardedVideoAd;
+    InterstitialAd interstitialAd;
     // load native image filters library
     static {
         System.loadLibrary("NativeImageProcessor");
@@ -128,9 +132,15 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         // loadImage();
 
-
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
+
+        //initialize ads
+        MobileAds.initialize(this,"ca-app-pub-3894268392664867/5935308763");
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId("ca-app-pub-3894268392664867/5935308763");
+        AdRequest adRequest = new AdRequest.Builder().build();
+        interstitialAd.loadAd(adRequest);
 
 //        imageCapturedURI = getIntent().getData();
 //        setCroppedImage(imageCapturedURI);
@@ -287,11 +297,16 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }
 
         if (id == R.id.action_save) {
+            //show ads
+            if(interstitialAd.isLoaded())
+                interstitialAd.show();
             saveImageToGallery();
             return true;
         }
 
         if (id == R.id.action_share) {
+            if(interstitialAd.isLoaded())
+                interstitialAd.show();
             shareImage();
             return true;
         }
@@ -375,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     public void openImageFromGallery() {
         framer.setImageResource(0);
-        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {

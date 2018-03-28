@@ -43,6 +43,7 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.charanajay.photoframer.utils.*;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
@@ -300,14 +301,24 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
             //show ads
             if(interstitialAd.isLoaded())
                 interstitialAd.show();
-            saveImageToGallery();
+            interstitialAd.setAdListener(new AdListener(){
+                @Override
+                public void onAdClosed() {
+                    saveImageToGallery();
+                }
+            });
             return true;
         }
 
         if (id == R.id.action_share) {
             if(interstitialAd.isLoaded())
                 interstitialAd.show();
-            shareImage();
+                interstitialAd.setAdListener(new AdListener(){
+                    @Override
+                    public void onAdClosed() {
+                        shareImage();
+                    }
+                });
             return true;
         }
 

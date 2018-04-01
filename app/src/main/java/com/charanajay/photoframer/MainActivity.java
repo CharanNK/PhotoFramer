@@ -2,6 +2,8 @@ package com.charanajay.photoframer;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -62,6 +64,7 @@ import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubfilter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     private RewardedVideoAd mRewardedVideoAd;
     InterstitialAd interstitialAd;
+
     // load native image filters library
     static {
         System.loadLibrary("NativeImageProcessor");
@@ -137,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         tabLayout.setupWithViewPager(viewPager);
 
         //initialize ads
-        MobileAds.initialize(this,"ca-app-pub-3894268392664867/5935308763");
+        MobileAds.initialize(this, "ca-app-pub-3894268392664867/5935308763");
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId("ca-app-pub-3894268392664867/5935308763");
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -148,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         Intent intent = getIntent();
         String selectionType = intent.getStringExtra("selectionType");
-        if(selectionType.equals("gallery"))
+        if (selectionType.equals("gallery"))
             openImageFromGallery();
         else openCamera();
     }
@@ -299,26 +303,26 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         if (id == R.id.action_save) {
             //show ads
-            if(interstitialAd.isLoaded())
-                interstitialAd.show();
-            interstitialAd.setAdListener(new AdListener(){
-                @Override
-                public void onAdClosed() {
+//            if (interstitialAd.isLoaded())
+//                interstitialAd.show();
+//            interstitialAd.setAdListener(new AdListener() {
+//                @Override
+//                public void onAdClosed() {
                     saveImageToGallery();
-                }
-            });
+//                }
+//            });
             return true;
         }
 
         if (id == R.id.action_share) {
-            if(interstitialAd.isLoaded())
+            if (interstitialAd.isLoaded())
                 interstitialAd.show();
-                interstitialAd.setAdListener(new AdListener(){
-                    @Override
-                    public void onAdClosed() {
-                        shareImage();
-                    }
-                });
+            interstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    shareImage();
+                }
+            });
             return true;
         }
 
@@ -327,18 +331,16 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode==RESULT_OK){
-            if(requestCode== Crop.REQUEST_PICK){
+        if (resultCode == RESULT_OK) {
+            if (requestCode == Crop.REQUEST_PICK) {
                 Uri source_uri = data.getData();
-                Uri destination_uri = Uri.fromFile(new File(getCacheDir(),"cropped"));
+                Uri destination_uri = Uri.fromFile(new File(getCacheDir(), "cropped"));
 
-                Log.d("destination URI :",destination_uri.toString());
+                Log.d("destination URI :", destination_uri.toString());
 
                 UCrop.of(source_uri, destination_uri)
                         .withAspectRatio(1, 1)
-                        //.withMaxResultSize(800, 800)
                         .start(this);
-//                setCroppedImage(Crop.getOutput(data));
             }
             if (requestCode == CAMERA_PIC_REQUEST && resultCode == RESULT_OK) {
                 Log.d("x", "called camera pick");
@@ -350,10 +352,8 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
                 UCrop.of(source_uri, destination_uri)
                         .withAspectRatio(1, 1)
-                        //.withMaxResultSize(800,800)
                         .start(this);
-            }
-            else if(requestCode==UCrop.REQUEST_CROP){
+            } else if (requestCode == UCrop.REQUEST_CROP) {
                 setCroppedImage(UCrop.getOutput(data));
             }
         }
@@ -401,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     public void openImageFromGallery() {
         framer.setImageResource(0);
-        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.INTERNET)
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 //                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //                            intent.setType("image/*");
 //                            startActivityForResult(intent, SELECT_GALLERY_IMAGE);
-                                callCroper();
+                            callCroper();
                         } else {
                             Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
                         }
@@ -425,19 +425,19 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     public void openCamera() {
         Log.d("CAMERA", "called function");
-        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA)
+        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
                             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                             String dirName = String.valueOf(System.currentTimeMillis() + ".jpg");
-                            File appTempDir = new File(Environment.getExternalStorageDirectory().getPath()+"/IPLFramer/Temp/temp");
-                            if(!appTempDir.exists()){
-                                File appDir =  new File("/sdcard/IPLFramer/Temp");
+                            File appTempDir = new File(Environment.getExternalStorageDirectory().getPath() + "/IPLFramer/Temp/temp");
+                            if (!appTempDir.exists()) {
+                                File appDir = new File("/sdcard/IPLFramer/Temp");
                                 appDir.mkdirs();
                             }
-                            File file = new File(appTempDir+dirName);
+                            File file = new File(appTempDir + dirName);
                             try {
 
                                 imageCapturedURI = Uri.fromFile(file);
@@ -462,7 +462,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 }).check();
     }
 
-    public void callCroper(){
+    public void callCroper() {
         Crop.pickImage(this);
     }
 
@@ -470,13 +470,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     * saves image to camera gallery
     * */
     private void saveImageToGallery() {
-        Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        Dexter.withActivity(this).withPermissions( Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
-//                            BitmapDrawable userImagedrawable = (BitmapDrawable) imagePreview.getDrawable();
-//                            Bitmap userImage = userImagedrawable.getBitmap();
 
                             View imageView = (ImageView) findViewById(R.id.image_preview);
                             imageView.setDrawingCacheEnabled(true);
@@ -490,7 +488,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                             } else {
                                 finalImage = userImage;
                             }
-                            final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
+                            //saves image to pictures folder. not using
+                            //final String path = BitmapUtils.insertImage(getContentResolver(), finalImage, System.currentTimeMillis() + "_profile.jpg", null);
+
+
+                            final String path = savebitmap(finalImage);
                             if (!TextUtils.isEmpty(path)) {
                                 Snackbar snackbar = Snackbar
                                         .make(coordinatorLayout, "Image saved to gallery!", Snackbar.LENGTH_LONG)
@@ -521,6 +523,39 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
     }
 
+    private String savebitmap(Bitmap finalImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        finalImage.compress(Bitmap.CompressFormat.JPEG, 60, bytes);
+        String appDirectoryName = "IPL Framer";
+        String imageName = System.currentTimeMillis()+".jpg";
+        final File imageRoot = new File(Environment.getExternalStorageDirectory(),appDirectoryName);
+        imageRoot.mkdirs();
+//        File fileToSave = new File(Environment.getExternalStorageDirectory()
+//                + File.separator +"IPL Framer"+File.separator+"Saved"+File.separator+ System.currentTimeMillis()+".jpg");
+        final File fileToSave = new File(imageRoot,imageName);
+        try {
+            fileToSave.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileOutputStream fo = null;
+        try {
+            fo = new FileOutputStream(fileToSave);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        String url = null;
+        try {
+            fo.write(bytes.toByteArray());
+            fo.close();
+            url = MediaStore.Images.Media.insertImage(getContentResolver()
+                    ,fileToSave.getAbsolutePath(),fileToSave.getName(),fileToSave.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+
     private void shareImage() {
         {
             Dexter.withActivity(this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -542,12 +577,12 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                                 }
 
                                 File file = null;
-                                if(finalImage != null){
+                                if (finalImage != null) {
                                     final String dirPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Screenshots";
                                     File dir = new File(dirPath);
-                                    if(!dir.exists())
+                                    if (!dir.exists())
                                         dir.mkdirs();
-                                    file = new File(dirPath, finalImage+".jpg");
+                                    file = new File(dirPath, finalImage + ".jpg");
                                     try {
                                         FileOutputStream fOut = new FileOutputStream(file);
                                         finalImage.compress(Bitmap.CompressFormat.PNG, 100, fOut);
@@ -563,7 +598,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                                 intent.setAction(Intent.ACTION_SEND);
                                 intent.setType("image/jpeg");
                                 String str = "https://play.google.com/store/apps/details?id=" + getPackageName();
-                                intent.putExtra(android.content.Intent.EXTRA_TEXT, "Find more cool frames of your favorite teams\n\nDownload IPL Photo Framer:\n"+str);
+                                intent.putExtra(android.content.Intent.EXTRA_TEXT, "Find more cool frames of your favorite teams\n\nDownload IPL Photo Framer:\n" + str);
                                 intent.putExtra(Intent.EXTRA_STREAM, uri);
                                 try {
                                     startActivity(Intent.createChooser(intent, "Share Image"));
@@ -649,10 +684,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     private Bitmap createSingleImageFromMultipleImages(Bitmap firstImage, Bitmap secondImage) {
         Bitmap result = Bitmap.createBitmap(firstImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
         Canvas canvas = new Canvas(result);
-//        canvas.drawBitmap(firstImage, 0f, 0f, null);
-//        int x = canvas.getWidth()-secondImage.getWidth();
-//        int y = canvas.getHeight()-secondImage.getHeight();
-//        canvas.drawBitmap(secondImage, x, y, null);
         canvas.drawBitmap(firstImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
         canvas.drawBitmap(secondImage, null, new Rect(0, 0, firstImage.getWidth(), firstImage.getHeight()), new Paint());
         return result;

@@ -35,6 +35,7 @@ public class FrameListFragment extends Fragment {
 
         ArrayList<Integer> frames = new ArrayList<Integer>();
 
+        frames.add(R.drawable.rcb_support);
         frames.add(R.drawable.rcb_basic);
         frames.add(R.drawable.rcb_cupnamde);
         frames.add(R.drawable.rcb_playbold);
@@ -42,28 +43,41 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.rcb_sidekannada);
         frames.add(R.drawable.rcb_sideenglish);
         frames.add(R.drawable.rcb_playbold_test);
+        frames.add(R.drawable.rcb_bangalore_kan);
+        frames.add(R.drawable.rcb_kohli);
+        frames.add(R.drawable.csk_isupport);
         frames.add(R.drawable.csk_dhoni);
         frames.add(R.drawable.csk_kingsback);
         frames.add(R.drawable.csk_whistlepodu);
         frames.add(R.drawable.csk_roarformore);
         frames.add(R.drawable.csk_squad);
+        frames.add(R.drawable.mi_isupport);
         frames.add(R.drawable.mi_basic);
         frames.add(R.drawable.mi_dilse);
         frames.add(R.drawable.mi_blue);
         frames.add(R.drawable.mi_squad);
+        frames.add(R.drawable.kkr_isupport);
         frames.add(R.drawable.kkr_basic);
         frames.add(R.drawable.kkr_iamkkr);
         frames.add(R.drawable.kkr_korbo);
         frames.add(R.drawable.kkr_amikkr);
+        frames.add(R.drawable.kkr_taiyaar);
+        frames.add(R.drawable.delhi_isupport);
         frames.add(R.drawable.dd_basic);
         frames.add(R.drawable.dd_players);
+        frames.add(R.drawable.dd_dildelhi);
+        frames.add(R.drawable.kingsxi_isupport);
         frames.add(R.drawable.kingsxi_portrait);
         frames.add(R.drawable.kingsxi_panga);
+        frames.add(R.drawable.kingsxi_saddi);
+        frames.add(R.drawable.rajastan_isupport);
         frames.add(R.drawable.rajastan_hallabol);
         frames.add(R.drawable.rajastan_gradient);
         frames.add(R.drawable.rajastan_portrait);
+        frames.add(R.drawable.srh_isupport);
         frames.add(R.drawable.sunrisers_orange);
         frames.add(R.drawable.sunrisers_basic);
+        frames.add(R.drawable.srh_orange_army);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = view.findViewById(R.id.frames_recycler_view);

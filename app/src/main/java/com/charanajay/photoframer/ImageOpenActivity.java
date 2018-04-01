@@ -36,9 +36,9 @@ public class ImageOpenActivity extends AppCompatActivity{
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getString(R.string.activity_title_main));
+//        Toolbar toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setTitle(getString(R.string.activity_title_main));
     }
     public void openImageFromGallery(View view){
         Intent intent = new Intent(this,MainActivity.class);
@@ -52,14 +52,18 @@ public class ImageOpenActivity extends AppCompatActivity{
         startActivity(intent);
     }
     public void openSavedPhotos(View view){
-        File sdDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-//        File f = new File(sdDir, "Pictures");
+        String appDirectoryName = "IPL Framer";
+        final File imageRoot = new File(Environment.getExternalStorageDirectory(),appDirectoryName);
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
+        if(imageRoot.exists()) {
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
 //        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath() + "/Pictures");
-        intent.setDataAndType(Uri.withAppendedPath(Uri.fromFile(sdDir), "/Pictures"), "image/*");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setDataAndType(Uri.parse("file://" +imageRoot.toString()), "image/*");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        startActivity(Intent.createChooser(intent, "Open images"));
-        startActivity(intent);
+            startActivity(intent);
+        }
+        else Toast.makeText(getApplicationContext(),"You have not saved any images from the app!",Toast.LENGTH_LONG).show();
     }
 }

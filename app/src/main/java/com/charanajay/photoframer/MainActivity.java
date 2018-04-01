@@ -22,6 +22,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -117,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     float saturationFinal = 1.0f;
     float contrastFinal = 1.0f;
 
-    private RewardedVideoAd mRewardedVideoAd;
     InterstitialAd interstitialAd;
 
     // load native image filters library
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         tabLayout.setupWithViewPager(viewPager);
 
         //initialize ads
-        MobileAds.initialize(this, "ca-app-pub-3894268392664867/5935308763");
+//        MobileAds.initialize(this, "ca-app-pub-3894268392664867/5935308763");
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId("ca-app-pub-3894268392664867/5935308763");
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -152,8 +152,21 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         Intent intent = getIntent();
         String selectionType = intent.getStringExtra("selectionType");
-        if (selectionType.equals("gallery"))
+        if (selectionType.equals("gallery")){
+            interstitialAd = new InterstitialAd(getApplicationContext());
+            interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+            adRequest = new AdRequest.Builder().build();
+            interstitialAd.loadAd(adRequest);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    if(interstitialAd.isLoaded())
+                        interstitialAd.show();
+                }
+            }, 10000);
             openImageFromGallery();
+        }
         else openCamera();
     }
 
@@ -303,14 +316,14 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         if (id == R.id.action_save) {
             //show ads
-//            if (interstitialAd.isLoaded())
-//                interstitialAd.show();
-//            interstitialAd.setAdListener(new AdListener() {
-//                @Override
-//                public void onAdClosed() {
+            if (interstitialAd.isLoaded())
+                interstitialAd.show();
+            interstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
                     saveImageToGallery();
-//                }
-//            });
+                }
+            });
             return true;
         }
 

@@ -16,4 +16,7 @@
     <string name="filter_normal">Normal</string>
     <string name="action_save">SAVE</string>
     <string name="action_open">OPEN</string>
+
+    <string name="non_vide_addid">ca-app-pub-3894268392664867/3638767152</string>
+    <string name="video_ad_unitid">ca-app-pub-3894268392664867/5935308763</string>
 </resources>

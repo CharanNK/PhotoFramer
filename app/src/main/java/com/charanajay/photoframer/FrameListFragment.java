@@ -51,11 +51,15 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.csk_whistlepodu);
         frames.add(R.drawable.csk_roarformore);
         frames.add(R.drawable.csk_squad);
+        frames.add(R.drawable.csk_one);
+        frames.add(R.drawable.csk_two);
         frames.add(R.drawable.mi_isupport);
         frames.add(R.drawable.mi_basic);
         frames.add(R.drawable.mi_dilse);
         frames.add(R.drawable.mi_blue);
         frames.add(R.drawable.mi_squad);
+        frames.add(R.drawable.mi_one);
+        frames.add(R.drawable.mi_two);
         frames.add(R.drawable.kkr_isupport);
         frames.add(R.drawable.kkr_basic);
         frames.add(R.drawable.kkr_iamkkr);
@@ -66,6 +70,8 @@ public class FrameListFragment extends Fragment {
         frames.add(R.drawable.dd_basic);
         frames.add(R.drawable.dd_players);
         frames.add(R.drawable.dd_dildelhi);
+        frames.add(R.drawable.dd_playerstwo);
+        frames.add(R.drawable.dd_one);
         frames.add(R.drawable.kingsxi_isupport);
         frames.add(R.drawable.kingsxi_portrait);
         frames.add(R.drawable.kingsxi_panga);

@@ -13,10 +13,10 @@
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/framer_logo"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/framer_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar.Fullscreen">
         <activity android:name=".MainActivity">

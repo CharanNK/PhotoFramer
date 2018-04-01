@@ -13,6 +13,9 @@ import android.widget.ImageView;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;

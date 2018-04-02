@@ -5,7 +5,10 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,6 +34,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -119,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     float contrastFinal = 1.0f;
 
     InterstitialAd interstitialAd;
+    SharedPreferences sharedPreferences;
+
+    public Boolean isAdEnabled;
 
     // load native image filters library
     static {
@@ -135,37 +142,41 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.activity_title_main));
 
-
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
 
-        //initialize ads
-        interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId("ca-app-pub-3894268392664867/5935308763");
-        AdRequest adRequest = new AdRequest.Builder().build();
-        interstitialAd.loadAd(adRequest);
+        sharedPreferences = getSharedPreferences("ipl_framer", MODE_PRIVATE);
+        isAdEnabled = sharedPreferences.getBoolean("isadenabled", false);
 
 //        imageCapturedURI = getIntent().getData();
 //        setCroppedImage(imageCapturedURI);
 
+        boolean isFirstTime = sharedPreferences.getBoolean("isfirst", false);
+        Log.d("isfirsttime:", String.valueOf(isFirstTime));
+
         Intent intent = getIntent();
         String selectionType = intent.getStringExtra("selectionType");
         if (selectionType.equals("gallery")) {
-            interstitialAd = new InterstitialAd(this);
-            interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
-            AdRequest adRequest1 = new AdRequest.Builder().build();
-            interstitialAd.loadAd(adRequest1);
-            interstitialAd.setAdListener(new AdListener() {
-                @Override
-                public void onAdLoaded() {
-                    interstitialAd.show();
-                    super.onAdLoaded();
+            Log.d("TEST","isadenabled:"+isAdEnabled);
+            if (isAdEnabled) {
+                if (!isFirstTime) {
+                    Log.d("ADDebug","coming here");
+                    interstitialAd = new InterstitialAd(this);
+                    interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+                    AdRequest adRequest1 = new AdRequest.Builder().build();
+                    interstitialAd.loadAd(adRequest1);
+                    interstitialAd.setAdListener(new AdListener() {
+                        @Override
+                        public void onAdLoaded() {
+                            interstitialAd.show();
+                            super.onAdLoaded();
+                        }
+                    });
                 }
-            });
+            }
             openImageFromGallery();
         } else openCamera();
 
-        showAd();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -193,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         // reset image controls
         resetControls();
 
-        if(Math.random()<0.2){
+        if (Math.random() < 0.2 && isAdEnabled) {
             showAd();
         }
 
@@ -312,29 +323,39 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         int id = item.getItemId();
 
         if (id == R.id.action_open) {
-            interstitialAd = new InterstitialAd(this);
-            interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
-            AdRequest adRequest1 = new AdRequest.Builder().build();
-            interstitialAd.loadAd(adRequest1);
-            interstitialAd.setAdListener(new AdListener() {
-                @Override
-                public void onAdLoaded() {
-                    interstitialAd.show();
-                    super.onAdLoaded();
-                }
-            });
+            if (isAdEnabled) {
+                interstitialAd = new InterstitialAd(this);
+                interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+                AdRequest adRequest1 = new AdRequest.Builder().build();
+                interstitialAd.loadAd(adRequest1);
+                interstitialAd.setAdListener(new AdListener() {
+                    @Override
+                    public void onAdLoaded() {
+                        interstitialAd.show();
+                        super.onAdLoaded();
+                    }
+                });
+            }
             openImageFromGallery();
             return true;
         }
 
         if (id == R.id.action_save) {
             //show ads
+            boolean isRated = sharedPreferences.getBoolean("israted", false);
+            Log.d("rated value:", String.valueOf(isRated));
+            if (!isRated && Math.random() < 0.4)
+                showRateDialog(this);
             showVideoAdd();
             saveImageToGallery();
             return true;
         }
 
         if (id == R.id.action_share) {
+            boolean isRated = sharedPreferences.getBoolean("israted", false);
+            Log.d("rated value:", String.valueOf(isRated));
+            if (!isRated && Math.random() < 0.3)
+                showRateDialog(this);
             showVideoAdd();
             shareImage();
             return true;
@@ -423,6 +444,9 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 //                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //                            intent.setType("image/*");
 //                            startActivityForResult(intent, SELECT_GALLERY_IMAGE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean("isfirst", true);
+                            editor.commit();
                             callCroper();
                         } else {
                             Toast.makeText(getApplicationContext(), "Permissions are not granted!", Toast.LENGTH_SHORT).show();
@@ -516,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                                                 openImage(path);
                                             }
                                         });
-
+                                openImage(path);
                                 snackbar.show();
                             } else {
                                 Snackbar snackbar = Snackbar
@@ -749,18 +773,53 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         }, 10000);
     }
 
-    public void showVideoAdd(){
-        interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId(getString(R.string.video_ad_unitid));
-        AdRequest adRequest = new AdRequest.Builder().build();
-        interstitialAd.loadAd(adRequest);
-        interstitialAd.setAdListener(new AdListener(){
-            @Override
-            public void onAdLoaded() {
-                interstitialAd.show();
-                super.onAdLoaded();
-            }
-        });
+    public void showVideoAdd() {
+        if (isAdEnabled) {
+            interstitialAd = new InterstitialAd(this);
+            interstitialAd.setAdUnitId(getString(R.string.video_ad_unitid));
+            AdRequest adRequest = new AdRequest.Builder().build();
+            interstitialAd.loadAd(adRequest);
+            interstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    interstitialAd.show();
+                    super.onAdLoaded();
+                }
+            });
+        }
+    }
+
+    public void showRateDialog(final Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setTitle("Rate Us!")
+                .setIcon(R.mipmap.framer_logo)
+                .setMessage("Please, rate the app at PlayStore")
+                .setPositiveButton("RATE", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (context != null) {
+                            String link = "market://details?id=";
+                            try {
+                                // play market available
+                                context.getPackageManager()
+                                        .getPackageInfo("com.android.vending", 0);
+                                // not available
+                            } catch (PackageManager.NameNotFoundException e) {
+                                e.printStackTrace();
+                                // should use browser
+                                link = "https://play.google.com/store/apps/details?id=";
+                            }
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean("israted", true);
+                            editor.commit();
+                            // starts external action
+                            context.startActivity(new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse(link + context.getPackageName())));
+                        }
+                    }
+                })
+                .setNegativeButton("CANCEL", null);
+        builder.show();
     }
 
 }

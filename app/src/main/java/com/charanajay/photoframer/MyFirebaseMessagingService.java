@@ -46,6 +46,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //        sendNotification(notification, data);
         if(remoteMessage.getData().size()>0){
             Log.d("FIREBASE", "Message data payload: " + remoteMessage.getData());
+            Log.d("FIREBASE","imgURL : "+remoteMessage.getData().get("image_url"));
             Bitmap bitmap = getBitmapfromUrl(remoteMessage.getData().get("image_url"));
             createNotification(remoteMessage.getData().get("title"), bitmap);
         }
@@ -61,6 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(title);
         notificationBuilder.setAutoCancel(true);
+//        notificationBuilder.setPriority(Notification.PRIORITY_MAX);
         notificationBuilder.setSmallIcon(R.mipmap.framer_logo);
         notificationBuilder.setContentIntent(pendingIntent);
         notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle()

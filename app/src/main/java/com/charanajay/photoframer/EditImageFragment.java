@@ -1,5 +1,6 @@
 package com.charanajay.photoframer;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,8 @@ import com.google.android.gms.ads.InterstitialAd;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
@@ -30,6 +33,8 @@ public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChan
     SeekBar seekBarSaturation;
 
     InterstitialAd interstitialAd;
+    SharedPreferences sharedPreferences;
+    public Boolean isAdEnabled;
 
     public void setListener(EditImageFragmentListener listener) {
         this.listener = listener;
@@ -51,7 +56,11 @@ public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChan
 
         ButterKnife.bind(this, view);
 
-        showAd();
+        sharedPreferences = this.getActivity().getSharedPreferences("ipl_framer", MODE_PRIVATE);
+        isAdEnabled = sharedPreferences.getBoolean("isadenabled", false);
+
+        if (Math.random() < 0.2 && isAdEnabled)
+            showAd();
 
         // keeping brightness value b/w -100 / +100
         seekBarBrightness.setMax(200);

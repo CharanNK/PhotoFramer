@@ -1,7 +1,9 @@
 package com.charanajay.photoframer;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +16,8 @@ import android.view.ViewGroup;
 
 import com.charanajay.photoframer.utils.BitmapUtils;
 import com.charanajay.photoframer.utils.SpacesItemDecoration;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
@@ -25,6 +29,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.Context.MODE_PRIVATE;
+
 
 public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.ThumbnailsAdapterListener {
     @BindView(R.id.recycler_view)
@@ -35,6 +41,11 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
     List<ThumbnailItem> thumbnailItemList;
 
     FiltersListFragmentListener listener;
+
+    InterstitialAd interstitialAd;
+
+    SharedPreferences sharedPreferences;
+    public Boolean isAdEnabled;
 
     private String TAG = "FiltersListFragment";
 
@@ -57,7 +68,13 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_filters_list, container, false);
 
-        Log.d(TAG,"onCreateView:called");
+        Log.d(TAG, "onCreateView:called");
+
+        sharedPreferences = this.getActivity().getSharedPreferences("ipl_framer", MODE_PRIVATE);
+        isAdEnabled = sharedPreferences.getBoolean("isadenabled", false);
+
+        if (Math.random() < 0.3 && isAdEnabled)
+            showAd();
 
         ButterKnife.bind(this, view);
 
@@ -89,7 +106,7 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
                 Bitmap thumbImage;
 
                 if (bitmap == null) {
-                    Log.d(TAG,"Filename while calling"+MainActivity.IMAGE_NAME);
+                    Log.d(TAG, "Filename while calling" + MainActivity.IMAGE_NAME);
                     thumbImage = BitmapUtils.getBitmapFromAssets(getActivity(), MainActivity.IMAGE_NAME, 100, 100);
                 } else {
                     thumbImage = Bitmap.createScaledBitmap(bitmap, 100, 100, false);
@@ -139,5 +156,20 @@ public class FiltersListFragment extends Fragment implements ThumbnailsAdapter.T
 
     public interface FiltersListFragmentListener {
         void onFilterSelected(Filter filter);
+    }
+
+    public void showAd() {
+        interstitialAd = new InterstitialAd(getContext());
+        interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+        AdRequest adRequest = new AdRequest.Builder().build();
+        interstitialAd.loadAd(adRequest);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if (interstitialAd.isLoaded())
+                    interstitialAd.show();
+            }
+        }, 10000);
     }
 }

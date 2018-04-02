@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
             //show ads
             boolean isRated = sharedPreferences.getBoolean("israted", false);
             Log.d("rated value:", String.valueOf(isRated));
-            if (!isRated && Math.random() < 0.4)
+            if (!isRated && Math.random() < 0.2)
                 showRateDialog(this);
             showVideoAdd();
             saveImageToGallery();
@@ -354,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         if (id == R.id.action_share) {
             boolean isRated = sharedPreferences.getBoolean("israted", false);
             Log.d("rated value:", String.valueOf(isRated));
-            if (!isRated && Math.random() < 0.3)
+            if (!isRated && Math.random() < 0.2)
                 showRateDialog(this);
             showVideoAdd();
             shareImage();

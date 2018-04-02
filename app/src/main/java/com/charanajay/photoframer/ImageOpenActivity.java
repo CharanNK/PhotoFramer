@@ -74,4 +74,14 @@ public class ImageOpenActivity extends AppCompatActivity {
         } else
             Toast.makeText(getApplicationContext(), "You have not saved any images from the app!", Toast.LENGTH_LONG).show();
     }
+
+    public void shareApp(View view){
+        String str = "https://play.google.com/store/apps/details?id=" + getPackageName();
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT,
+                "Hey! Find cool photo frames for your favorite IPL teams!!\n\nDownload IPL Photo Framer and support your IPL team:\n"+str);
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
+    }
 }

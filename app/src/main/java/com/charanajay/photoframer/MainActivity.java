@@ -135,13 +135,11 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.activity_title_main));
 
-        // loadImage();
 
         setupViewPager(viewPager);
         tabLayout.setupWithViewPager(viewPager);
 
         //initialize ads
-//        MobileAds.initialize(this, "ca-app-pub-3894268392664867/5935308763");
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId("ca-app-pub-3894268392664867/5935308763");
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -152,12 +150,12 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
 
         Intent intent = getIntent();
         String selectionType = intent.getStringExtra("selectionType");
-        if (selectionType.equals("gallery")){
+        if (selectionType.equals("gallery")) {
             interstitialAd = new InterstitialAd(this);
             interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
             AdRequest adRequest1 = new AdRequest.Builder().build();
             interstitialAd.loadAd(adRequest1);
-            interstitialAd.setAdListener(new AdListener(){
+            interstitialAd.setAdListener(new AdListener() {
                 @Override
                 public void onAdLoaded() {
                     interstitialAd.show();
@@ -165,8 +163,9 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
                 }
             });
             openImageFromGallery();
-        }
-        else openCamera();
+        } else openCamera();
+
+        showAd();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -193,6 +192,10 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     public void onFilterSelected(Filter filter) {
         // reset image controls
         resetControls();
+
+        if(Math.random()<0.2){
+            showAd();
+        }
 
         // applying the selected filter
         filteredImage = originalImage.copy(Bitmap.Config.ARGB_8888, true);
@@ -309,32 +312,31 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         int id = item.getItemId();
 
         if (id == R.id.action_open) {
+            interstitialAd = new InterstitialAd(this);
+            interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+            AdRequest adRequest1 = new AdRequest.Builder().build();
+            interstitialAd.loadAd(adRequest1);
+            interstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    interstitialAd.show();
+                    super.onAdLoaded();
+                }
+            });
             openImageFromGallery();
             return true;
         }
 
         if (id == R.id.action_save) {
             //show ads
-            if (interstitialAd.isLoaded())
-                interstitialAd.show();
-            interstitialAd.setAdListener(new AdListener() {
-                @Override
-                public void onAdClosed() {
-                    saveImageToGallery();
-                }
-            });
+            showVideoAdd();
+            saveImageToGallery();
             return true;
         }
 
         if (id == R.id.action_share) {
-            if (interstitialAd.isLoaded())
-                interstitialAd.show();
-            interstitialAd.setAdListener(new AdListener() {
-                @Override
-                public void onAdClosed() {
-                    shareImage();
-                }
-            });
+            showVideoAdd();
+            shareImage();
             return true;
         }
 
@@ -482,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
     * saves image to camera gallery
     * */
     private void saveImageToGallery() {
-        Dexter.withActivity(this).withPermissions( Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        Dexter.withActivity(this).withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -539,12 +541,12 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         finalImage.compress(Bitmap.CompressFormat.JPEG, 60, bytes);
         String appDirectoryName = "IPL Framer";
-        String imageName = System.currentTimeMillis()+".jpg";
-        final File imageRoot = new File(Environment.getExternalStorageDirectory(),appDirectoryName);
+        String imageName = System.currentTimeMillis() + ".jpg";
+        final File imageRoot = new File(Environment.getExternalStorageDirectory(), appDirectoryName);
         imageRoot.mkdirs();
 //        File fileToSave = new File(Environment.getExternalStorageDirectory()
 //                + File.separator +"IPL Framer"+File.separator+"Saved"+File.separator+ System.currentTimeMillis()+".jpg");
-        final File fileToSave = new File(imageRoot,imageName);
+        final File fileToSave = new File(imageRoot, imageName);
         try {
             fileToSave.createNewFile();
         } catch (IOException e) {
@@ -561,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
             fo.write(bytes.toByteArray());
             fo.close();
             url = MediaStore.Images.Media.insertImage(getContentResolver()
-                    ,fileToSave.getAbsolutePath(),fileToSave.getName(),fileToSave.getName());
+                    , fileToSave.getAbsolutePath(), fileToSave.getName(), fileToSave.getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -731,4 +733,34 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
             filtersListFragment.prepareThumbnail(originalImage);
         }
     }
+
+    public void showAd() {
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+        AdRequest adRequest = new AdRequest.Builder().build();
+        interstitialAd.loadAd(adRequest);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if (interstitialAd.isLoaded())
+                    interstitialAd.show();
+            }
+        }, 10000);
+    }
+
+    public void showVideoAdd(){
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId(getString(R.string.video_ad_unitid));
+        AdRequest adRequest = new AdRequest.Builder().build();
+        interstitialAd.loadAd(adRequest);
+        interstitialAd.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                interstitialAd.show();
+                super.onAdLoaded();
+            }
+        });
+    }
+
 }

@@ -27,7 +27,7 @@ import butterknife.ButterKnife;
  * Created by charank on 19-03-2018.
  */
 
-public class ImageOpenActivity extends AppCompatActivity{
+public class ImageOpenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,30 +43,35 @@ public class ImageOpenActivity extends AppCompatActivity{
 //        setSupportActionBar(toolbar);
 //        getSupportActionBar().setTitle(getString(R.string.activity_title_main));
     }
-    public void openImageFromGallery(View view){
-        Intent intent = new Intent(this,MainActivity.class);
-        intent.putExtra("selectionType","gallery");
+
+    public void openImageFromGallery(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("selectionType", "gallery");
         startActivity(intent);
     }
 
-    public void openImageFromCamera(View view){
-        Intent intent = new Intent(this,MainActivity.class);
-        intent.putExtra("selectionType","camera");
+    public void openImageFromCamera(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("selectionType", "camera");
         startActivity(intent);
     }
-    public void openSavedPhotos(View view){
+
+    public void openSavedPhotos(View view) {
         String appDirectoryName = "IPL Framer";
-        final File imageRoot = new File(Environment.getExternalStorageDirectory(),appDirectoryName);
+        final File imageRoot = new File(Environment.getExternalStorageDirectory(), appDirectoryName);
+        if (imageRoot.exists()) {
+            File[] contents = imageRoot.listFiles();
+            if (contents.length > 0) {
 
-        if(imageRoot.exists()) {
-
-            Intent intent = new Intent(Intent.ACTION_VIEW);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
 //        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath() + "/Pictures");
-            intent.setDataAndType(Uri.parse("file://" +imageRoot.toString()), "image/*");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setDataAndType(Uri.parse("file://" + imageRoot.toString()), "image/*");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        startActivity(Intent.createChooser(intent, "Open images"));
-            startActivity(intent);
-        }
-        else Toast.makeText(getApplicationContext(),"You have not saved any images from the app!",Toast.LENGTH_LONG).show();
+                startActivity(intent);
+            }
+            else Toast.makeText(getApplicationContext(), "You have not saved any images from the app!", Toast.LENGTH_LONG).show();
+        } else
+            Toast.makeText(getApplicationContext(), "You have not saved any images from the app!", Toast.LENGTH_LONG).show();
     }
 }

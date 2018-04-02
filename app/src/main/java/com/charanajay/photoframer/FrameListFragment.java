@@ -1,6 +1,7 @@
 package com.charanajay.photoframer;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 
 
 import com.charanajay.photoframer.utils.SpacesItemDecoration;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import java.util.ArrayList;
 
@@ -22,11 +25,12 @@ import java.util.ArrayList;
 public class FrameListFragment extends Fragment {
     View view;
     String bitmap;
-
+    InterstitialAd interstitialAd;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_frames_list, container, false);
         initFrameRecycler();
+        showAd();
         return view;
     }
 
@@ -96,5 +100,20 @@ public class FrameListFragment extends Fragment {
         recyclerView.addItemDecoration(new SpacesItemDecoration(space));
         recyclerView.setAdapter(framesAdapter);
 
+    }
+
+    public void showAd() {
+        interstitialAd = new InterstitialAd(getContext());
+        interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+        AdRequest adRequest = new AdRequest.Builder().build();
+        interstitialAd.loadAd(adRequest);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if (interstitialAd.isLoaded())
+                    interstitialAd.show();
+            }
+        }, 10000);
     }
 }

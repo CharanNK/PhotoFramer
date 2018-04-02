@@ -1,11 +1,16 @@
 package com.charanajay.photoframer;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,6 +28,8 @@ public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChan
 
     @BindView(R.id.seekbar_saturation)
     SeekBar seekBarSaturation;
+
+    InterstitialAd interstitialAd;
 
     public void setListener(EditImageFragmentListener listener) {
         this.listener = listener;
@@ -43,6 +50,8 @@ public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChan
         View view = inflater.inflate(R.layout.fragment_edit_image, container, false);
 
         ButterKnife.bind(this, view);
+
+        showAd();
 
         // keeping brightness value b/w -100 / +100
         seekBarBrightness.setMax(200);
@@ -118,5 +127,19 @@ public class EditImageFragment extends Fragment implements SeekBar.OnSeekBarChan
         void onEditStarted();
 
         void onEditCompleted();
+    }
+
+    public void showAd() {
+        interstitialAd = new InterstitialAd(getContext());
+        interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+        AdRequest adRequest = new AdRequest.Builder().build();
+        interstitialAd.loadAd(adRequest);
+        interstitialAd.setAdListener(new AdListener(){
+            @Override
+            public void onAdLoaded() {
+                interstitialAd.show();
+                super.onAdLoaded();
+            }
+        });
     }
 }

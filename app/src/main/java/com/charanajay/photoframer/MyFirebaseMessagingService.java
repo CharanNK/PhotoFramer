@@ -61,7 +61,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(title);
         notificationBuilder.setAutoCancel(true);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        notificationBuilder.setSmallIcon(R.mipmap.framer_logo);
         notificationBuilder.setContentIntent(pendingIntent);
         notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle()
                 .bigPicture(bitmap));
@@ -95,7 +95,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * @param data FCM data payload received.
      */
     private void sendNotification(RemoteMessage.Notification notification, Map<String, String> data) {
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.framer_logo);
 
         Intent intent = new Intent(this, Splashscreen.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -112,7 +112,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setColor(Color.RED)
                 .setLights(Color.RED, 1000, 300)
                 .setDefaults(Notification.DEFAULT_VIBRATE)
-                .setSmallIcon(R.mipmap.ic_launcher);
+                .setSmallIcon(R.mipmap.framer_logo);
 
         try {
             String picture_url = data.get("picture_url");

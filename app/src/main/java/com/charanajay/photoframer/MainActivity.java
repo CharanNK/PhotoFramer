@@ -153,6 +153,17 @@ public class MainActivity extends AppCompatActivity implements FiltersListFragme
         Intent intent = getIntent();
         String selectionType = intent.getStringExtra("selectionType");
         if (selectionType.equals("gallery")){
+            interstitialAd = new InterstitialAd(this);
+            interstitialAd.setAdUnitId(getString(R.string.non_vide_addid));
+            AdRequest adRequest1 = new AdRequest.Builder().build();
+            interstitialAd.loadAd(adRequest1);
+            interstitialAd.setAdListener(new AdListener(){
+                @Override
+                public void onAdLoaded() {
+                    interstitialAd.show();
+                    super.onAdLoaded();
+                }
+            });
             openImageFromGallery();
         }
         else openCamera();
